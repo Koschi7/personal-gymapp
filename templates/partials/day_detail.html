@@ -1,0 +1,41 @@
+{% if workouts %}
+<div class="day-detail">
+    <div class="day-detail-header">
+        <span class="day-detail-date">{{ date_fmt }}</span>
+        <button class="btn-icon-only btn-icon-close" onclick="this.closest('.day-detail').remove()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+        </button>
+    </div>
+    {% for w in workouts %}
+    <div class="day-detail-workout">
+        <div class="body-part-tags">
+            {% for bp in w.body_parts %}
+            <span class="tag tag-sm">{{ bp }}</span>
+            {% endfor %}
+        </div>
+        {% for ex in w.exercises %}
+        <div class="exercise-row">
+            <div class="exercise-info">
+                <span class="exercise-name">{{ ex.name }}</span>
+                <span class="exercise-detail">{{ ex.body_part }} &middot; {{ ex.weight }} kg &middot; {{ ex.reps }} Wdh.</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="day-detail">
+    <div class="day-detail-header">
+        <span class="day-detail-date">{{ date_fmt }}</span>
+        <button class="btn-icon-only btn-icon-close" onclick="this.closest('.day-detail').remove()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+        </button>
+    </div>
+    <p class="stats-empty">Kein Training an diesem Tag.</p>
+</div>
+{% endif %}

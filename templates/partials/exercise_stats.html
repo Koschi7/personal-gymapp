@@ -1,0 +1,31 @@
+<div class="filter-pills">
+    {% for key, label in [("today", "Heute"), ("7days", "7 Tage"), ("30days", "30 Tage"), ("90days", "90 Tage"), ("all", "Gesamt")] %}
+    <button class="pill {% if active_period == key %}pill-active{% endif %}"
+            hx-get="/exercise-stats?period={{ key }}"
+            hx-target="#exercise-stats-section"
+            hx-swap="innerHTML">
+        {{ label }}
+    </button>
+    {% endfor %}
+</div>
+
+{% if exercise_stats %}
+<div class="stats-list">
+    {% for stat in exercise_stats %}
+    <div class="stat-row">
+        <div class="stat-label-col">
+            <span class="stat-label">{{ stat.name }}</span>
+            <span class="stat-sublabel">{{ stat.body_part }}</span>
+        </div>
+        <div class="stat-bar-wrap">
+            {% set max_count = exercise_stats[0].count %}
+            <div class="stat-bar" style="width: {{ (stat.count / max_count * 100) | round }}%"></div>
+        </div>
+        <span class="stat-count">{{ stat.count }}x</span>
+        <span class="stat-pct">{{ stat.pct }}%</span>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<p class="stats-empty">Keine Daten für diesen Zeitraum.</p>
+{% endif %}

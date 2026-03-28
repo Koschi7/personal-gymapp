@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>
+{% endblock %}
+
+{% block content %}
+<div class="page">
+    <h1 class="page-title">Gewicht</h1>
+
+    <div id="weight-content">
+        {% include "partials/weight_content.html" %}
+    </div>
+
+    <div class="card">
+        <form hx-post="/weight" hx-target="#weight-content" hx-swap="innerHTML" hx-on::after-request="this.reset()">
+            <div class="form-row form-row-inline">
+                <input type="number" name="weight" placeholder="Gewicht (kg)" required class="input" step="0.1" min="30" max="300" inputmode="decimal">
+                <button type="submit" class="btn">Speichern</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

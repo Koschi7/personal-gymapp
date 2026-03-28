@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page">
+    <div class="page-header">
+        {% if profile.picture %}
+        <img src="/uploads/{{ profile.picture }}" alt="Profil" class="avatar avatar-lg">
+        {% else %}
+        <div class="avatar avatar-lg avatar-placeholder">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 00-16 0"/>
+            </svg>
+        </div>
+        {% endif %}
+        <h1>Hallo{% if profile.name %}, {{ profile.name }}{% endif %}</h1>
+    </div>
+
+    {% if active_workout %}
+    <div class="card card-active-workout">
+        <div class="card-label">Aktives Training</div>
+        <div class="active-workout-info">
+            <span>Gestartet {{ active_workout.started_fmt }}</span>
+            {% if active_exercises %}
+            <span class="exercise-detail">{{ active_exercises | length }} Übungen</span>
+            {% endif %}
+        </div>
+        <div class="active-workout-actions">
+            <a href="/training" class="btn btn-small">Weiter trainieren</a>
+            <form action="/training/end/{{ active_workout.id }}" method="post" style="display:inline">
+                <button type="submit" class="btn btn-small btn-danger">Beenden</button>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Goal Progress -->
+    <div class="card">
+        <div class="card-label">Diese Woche</div>
+        <div class="progress-row">
+            <div class="progress-bar-wrap">
+                {% set pct_week = ((days_week / profile.goal_days_week * 100) | round | int) if profile.goal_days_week > 0 else 0 %}
+                {% set pct_week = [pct_week, 100] | min %}
+                <div class="progress-bar {% if pct_week >= 100 %}progress-bar-done{% endif %}" style="width: {{ pct_week }}%"></div>
+            </div>
+            <span class="progress-text">{{ days_week }} / {{ profile.goal_days_week }}</span>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-label">Dieser Monat</div>
+        <div class="progress-row">
+            <div class="progress-bar-wrap">
+                {% set pct_month = ((days_month / profile.goal_days_month * 100) | round | int) if profile.goal_days_month > 0 else 0 %}
+                {% set pct_month = [pct_month, 100] | min %}
+                <div class="progress-bar {% if pct_month >= 100 %}progress-bar-done{% endif %}" style="width: {{ pct_month }}%"></div>
+            </div>
+            <span class="progress-text">{{ days_month }} / {{ profile.goal_days_month }}</span>
+        </div>
+    </div>
+
+    <!-- Body Part Stats -->
+    <div class="card">
+        <div class="card-label">Körperteile</div>
+        <div id="stats-section">
+            {% include "partials/stats_section.html" %}
+        </div>
+    </div>
+
+    <!-- Exercise Stats -->
+    <div class="card">
+        <div class="card-label">Übungen</div>
+        <div id="exercise-stats-section">
+            {% include "partials/exercise_stats.html" %}
+        </div>
+    </div>
+
+    <!-- Last Workout -->
+    {% if last_workout %}
+    <div class="card">
+        <div class="card-label">Letztes Training</div>
+        <div class="card-subtitle">
+            {{ last_workout.date_fmt }}
+            {% for bp in last_workout.body_parts %}
+            <span class="tag tag-sm">{{ bp }}</span>
+            {% endfor %}
+        </div>
+        {% for ex in last_workout.exercises %}
+        <div class="exercise-row">
+            <span class="exercise-name">{{ ex.name }}</span>
+            <span class="exercise-detail">{{ ex.weight }} kg &middot; {{ ex.reps }} Wdh.</span>
+        </div>
+        {% endfor %}
+    </div>
+    {% elif not active_workout %}
+    <div class="card card-empty">
+        <p>Noch kein Training abgeschlossen.</p>
+        <a href="/training" class="btn">Training starten</a>
+    </div>
+    {% endif %}
+
+    <!-- Calendar (compact, at the bottom) -->
+    <div class="card card-compact">
+        <div id="calendar-wrap">
+            {% include "partials/calendar.html" %}
+        </div>
+    </div>
+</div>
+{% endblock %}

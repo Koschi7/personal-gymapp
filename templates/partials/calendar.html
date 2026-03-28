@@ -1,0 +1,48 @@
+<div class="cal-header">
+    <button class="cal-nav"
+            hx-get="/calendar?year={{ cal.prev_year }}&month={{ cal.prev_month }}"
+            hx-target="#calendar-wrap"
+            hx-swap="innerHTML">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <span class="cal-title">{{ cal.month_name }} {{ cal.year }}</span>
+    <button class="cal-nav"
+            hx-get="/calendar?year={{ cal.next_year }}&month={{ cal.next_month }}"
+            hx-target="#calendar-wrap"
+            hx-swap="innerHTML">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+    </button>
+</div>
+
+<div class="cal-weekdays">
+    <span>Mo</span><span>Di</span><span>Mi</span><span>Do</span><span>Fr</span><span>Sa</span><span>So</span>
+</div>
+
+{% for week in cal.weeks %}
+<div class="cal-week">
+    {% for day in week %}
+    {% if day == 0 %}
+    <div class="cal-day cal-day-empty"></div>
+    {% else %}
+    {% set iso = '%04d-%02d-%02d' | format(cal.year, cal.month, day) %}
+    <div class="cal-day {% if day == cal.today_day %}cal-day-today{% endif %} {% if day in cal.training_days %}cal-day-trained cal-day-tap{% endif %}"
+         {% if day in cal.training_days %}
+         hx-get="/day/{{ iso }}"
+         hx-target="#day-detail"
+         hx-swap="innerHTML"
+         {% endif %}>
+        <span class="cal-day-num">{{ day }}</span>
+        {% if day in cal.training_days %}
+        <span class="cal-dot"></span>
+        {% endif %}
+    </div>
+    {% endif %}
+    {% endfor %}
+</div>
+{% endfor %}
+
+<div class="cal-summary">
+    <span>{{ cal.training_count }} Trainingstage in {{ cal.month_name }}</span>
+</div>
+
+<div id="day-detail"></div>

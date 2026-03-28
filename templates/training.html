@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page">
+    <h1 class="page-title">Training</h1>
+
+    {% if active_workout %}
+    <!-- Active workout -->
+    <div class="card">
+        <form hx-post="/training/add" hx-target="#current-exercises" hx-swap="innerHTML" hx-on::after-request="this.reset()">
+            <input type="hidden" name="workout_id" value="{{ active_workout.id }}">
+            <div class="form-row">
+                <select name="body_part" required class="input">
+                    <option value="" disabled selected>Körperteil</option>
+                    {% for bp in body_parts %}
+                    <option value="{{ bp }}">{{ bp }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-row ac-wrap">
+                <input type="text" name="name" placeholder="Übung" required class="input" autocomplete="off" id="exercise-input">
+                <div class="ac-dropdown" id="ac-dropdown"></div>
+            </div>
+            <div class="form-row form-row-half">
+                <input type="number" name="weight" placeholder="Gewicht (kg)" required class="input" step="0.5" min="0" inputmode="decimal">
+                <input type="number" name="reps" placeholder="Wdh." required class="input" min="1" inputmode="numeric">
+            </div>
+            <button type="submit" class="btn btn-full">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="btn-icon">
+                    <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                Hinzufügen
+            </button>
+        </form>
+    </div>
+
+    <div id="current-exercises">
+        {% include "partials/current_exercises.html" %}
+    </div>
+
+    <button type="button" class="btn btn-full btn-danger" id="end-btn">
+        <svg viewBox="0 0 24 24" fill="currentColor" class="btn-icon">
+            <rect x="6" y="6" width="12" height="12" rx="2"/>
+        </svg>
+        Training beenden
+    </button>
+
+    <!-- Confirmation dialog for empty workout -->
+    <div class="alert alert-warning" id="empty-warning" style="display:none">
+        <p class="alert-text">Du hast keine Übungen eingetragen. Das Training wird nicht gespeichert.</p>
+        <div class="alert-actions">
+            <button type="button" class="btn btn-small" id="back-btn">Zurück</button>
+            <form action="/training/end/{{ active_workout.id }}" method="post" style="display:inline">
+                <button type="submit" class="btn btn-small btn-danger">Trotzdem beenden</button>
+            </form>
+        </div>
+    </div>
+
+    {% else %}
+    <!-- No active workout -->
+    <div class="card">
+        <form action="/training/start" method="post">
+            <div class="form-group">
+                <label class="form-label">Datum (optional, Standard: heute)</label>
+                <input type="date" name="workout_date" value="{{ today }}" class="input">
+            </div>
+            <button type="submit" class="btn btn-full">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="btn-icon">
+                    <polygon points="5 3 19 12 5 21 5 3"/>
+                </svg>
+                Training starten
+            </button>
+        </form>
+    </div>
+    {% endif %}
+
+    <!-- Past workouts -->
+    {% if past_workouts %}
+    <h2 class="section-title">Vergangene Trainings</h2>
+    {% for w in past_workouts %}
+    <div class="card">
+        <div class="card-header-row">
+            <div>
+                <div class="card-label">{{ w.date_fmt }}</div>
+                <div class="body-part-tags">
+                    {% for bp in w.body_parts %}
+                    <span class="tag">{{ bp }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% for ex in w.exercises %}
+        <div class="exercise-row">
+            <div class="exercise-info">
+                <span class="exercise-name">{{ ex.name }}</span>
+                <span class="exercise-detail">{{ ex.body_part }} &middot; {{ ex.weight }} kg &middot; {{ ex.reps }} Wdh.</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endfor %}
+    {% endif %}
+</div>
+
+<script>
+(function() {
+    const input = document.getElementById('exercise-input');
+    const dropdown = document.getElementById('ac-dropdown');
+    if (!input || !dropdown) return;
+
+    let debounceTimer;
+
+    input.addEventListener('input', function() {
+        clearTimeout(debounceTimer);
+        const q = this.value.trim();
+        if (q.length < 1) { dropdown.innerHTML = ''; return; }
+        debounceTimer = setTimeout(() => {
+            fetch('/exercises/search?q=' + encodeURIComponent(q))
+                .then(r => r.json())
+                .then(results => {
+                    if (results.length === 0 || (results.length === 1 && results[0].name.toLowerCase() === q.toLowerCase())) {
+                        dropdown.innerHTML = '';
+                        return;
+                    }
+                    dropdown.innerHTML = results.map(r =>
+                        '<div class="ac-item" data-name="' + r.name.replace(/"/g, '&quot;') + '" data-bp="' + r.body_part + '">' +
+                        '<span class="ac-name">' + r.name + '</span>' +
+                        '<span class="ac-bp">' + r.body_part + '</span>' +
+                        '</div>'
+                    ).join('');
+                });
+        }, 150);
+    });
+
+    dropdown.addEventListener('click', function(e) {
+        const item = e.target.closest('.ac-item');
+        if (!item) return;
+        input.value = item.dataset.name;
+        // Auto-select body part
+        const select = document.querySelector('select[name="body_part"]');
+        if (select && item.dataset.bp) {
+            select.value = item.dataset.bp;
+        }
+        dropdown.innerHTML = '';
+        // Focus next field
+        const weightInput = document.querySelector('input[name="weight"]');
+        if (weightInput) weightInput.focus();
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.ac-wrap')) dropdown.innerHTML = '';
+    });
+})();
+
+// End workout button — show warning if no exercises
+(function() {
+    const endBtn = document.getElementById('end-btn');
+    const warning = document.getElementById('empty-warning');
+    const backBtn = document.getElementById('back-btn');
+    if (!endBtn || !warning) return;
+
+    endBtn.addEventListener('click', function() {
+        const exercises = document.querySelectorAll('#current-exercises .exercise-row');
+        if (exercises.length === 0) {
+            endBtn.style.display = 'none';
+            warning.style.display = 'block';
+            warning.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+            // Has exercises — submit directly
+            const form = document.createElement('form');
+            form.method = 'post';
+            form.action = endBtn.closest('.page').querySelector('form[action*="/training/end/"]')
+                ? warning.querySelector('form').action : '';
+            form.action = warning.querySelector('form').action;
+            document.body.appendChild(form);
+            form.submit();
+        }
+    });
+
+    if (backBtn) {
+        backBtn.addEventListener('click', function() {
+            warning.style.display = 'none';
+            endBtn.style.display = '';
+        });
+    }
+})();
+</script>
+{% endblock %}

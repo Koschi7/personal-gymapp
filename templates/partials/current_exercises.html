@@ -1,0 +1,23 @@
+{% if exercises %}
+<div class="card">
+    <div class="card-label">Aktuelle Übungen</div>
+    {% for ex in exercises %}
+    <div class="exercise-row">
+        <div class="exercise-info">
+            <span class="exercise-name">{{ ex.name }}</span>
+            <span class="exercise-detail">{{ ex.body_part }} &middot; {{ ex.weight }} kg &middot; {{ ex.reps }} Wdh.</span>
+        </div>
+        <button class="btn-icon-only"
+                hx-delete="/training/exercise/{{ ex.id }}?workout_id={{ ex.workout_id }}"
+                hx-target="#current-exercises"
+                hx-swap="innerHTML"
+                hx-confirm="Übung löschen?">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"/>
+                <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+            </svg>
+        </button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
