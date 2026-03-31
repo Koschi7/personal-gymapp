@@ -1,5 +1,6 @@
 import csv
 import io
+import json
 import os
 import shutil
 from contextlib import asynccontextmanager
@@ -292,10 +293,40 @@ async def export_csv():
                 ex.get("set_number", 1),
             ])
     output.seek(0)
+    csv_bytes = output.getvalue().encode("utf-8-sig")  # BOM for Excel compatibility
     return StreamingResponse(
-        iter([output.getvalue()]),
-        media_type="text/csv",
+        iter([csv_bytes]),
+        media_type="text/csv; charset=utf-8",
         headers={"Content-Disposition": "attachment; filename=gymapp_export.csv"},
+    )
+
+
+@app.get("/export/json")
+async def export_json():
+    workouts = await db.get_past_workouts(limit=10000)
+    data = []
+    for w in workouts:
+        data.append({
+            "date": w["date_fmt"],
+            "started_at": w["started_at"],
+            "ended_at": w["ended_at"],
+            "body_parts": w["body_parts"],
+            "exercises": [
+                {
+                    "name": ex["name"],
+                    "body_part": ex["body_part"],
+                    "weight": ex["weight"],
+                    "reps": ex["reps"],
+                    "set_number": ex.get("set_number", 1),
+                }
+                for ex in w["exercises"]
+            ],
+        })
+    output = json.dumps(data, ensure_ascii=False, indent=2)
+    return StreamingResponse(
+        iter([output.encode("utf-8")]),
+        media_type="application/json; charset=utf-8",
+        headers={"Content-Disposition": "attachment; filename=gymapp_export.json"},
     )
 
 
