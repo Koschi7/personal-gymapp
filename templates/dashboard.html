@@ -79,7 +79,11 @@
     <div class="card">
         <div class="card-label">Persönliche Rekorde</div>
         {% for pr in personal_records %}
-        <div class="exercise-row">
+        <div class="exercise-row"
+             hx-get="/exercises/history/{{ pr.name | urlencode }}"
+             hx-target="#exercise-history-modal"
+             hx-swap="innerHTML"
+             style="cursor:pointer">
             <div class="exercise-info">
                 <span class="exercise-name">{{ pr.name }}</span>
                 <span class="exercise-detail">{{ pr.body_part }}</span>
@@ -120,6 +124,9 @@
         <a href="/training" class="btn">Training starten</a>
     </div>
     {% endif %}
+
+    <!-- Exercise History Modal -->
+    <div id="exercise-history-modal" hx-on::after-settle="if(this.children.length) this.scrollIntoView({behavior:'smooth', block:'start'})"></div>
 
     <!-- Calendar (compact, at the bottom) -->
     <div class="card card-compact">

@@ -798,6 +798,34 @@ select.input option {
     100% { transform: scale(1); opacity: 1; }
 }
 
+/* === Exercise History === */
+.exercise-history {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.exercise-history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.exercise-history-title {
+    font-size: 17px;
+    font-weight: 600;
+}
+
+.exercise-history-list {
+    margin-top: 12px;
+}
+
+.exercise-history-list .exercise-row {
+    justify-content: space-between;
+}
+
 .pr-weight {
     color: #FFD60A;
     font-weight: 700;

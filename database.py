@@ -368,6 +368,29 @@ async def get_personal_records(limit: int = 10) -> list[dict]:
         await db.close()
 
 
+async def get_exercise_history(exercise_name: str) -> list[dict]:
+    """Get weight/volume history for an exercise over time, grouped by workout date."""
+    db = await get_db()
+    try:
+        cursor = await db.execute("""
+            SELECT date(w.started_at) as date, MAX(e.weight) as max_weight,
+                   SUM(e.weight * e.reps) as volume, SUM(e.reps) as total_reps,
+                   COUNT(*) as sets
+            FROM exercises e
+            JOIN workouts w ON e.workout_id = w.id
+            WHERE w.ended_at IS NOT NULL AND e.name = ?
+            GROUP BY date(w.started_at)
+            ORDER BY date(w.started_at) ASC
+        """, (exercise_name,))
+        rows = await cursor.fetchall()
+        result = [dict(r) for r in rows]
+        for entry in result:
+            entry["date_fmt"] = format_date(entry["date"])
+        return result
+    finally:
+        await db.close()
+
+
 async def get_last_performance(exercise_name: str) -> list[dict]:
     """Get weight/reps from the most recent completed workout containing this exercise."""
     db = await get_db()

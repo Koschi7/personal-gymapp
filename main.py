@@ -102,6 +102,16 @@ async def exercise_search(q: str = Query("")):
     return [{"name": r["name"], "body_part": r["body_part"]} for r in results]
 
 
+@app.get("/exercises/history/{name}", response_class=HTMLResponse)
+async def exercise_history(request: Request, name: str):
+    history = await db.get_exercise_history(name)
+    return templates.TemplateResponse("partials/exercise_history.html", {
+        "request": request,
+        "name": name,
+        "history": history,
+    })
+
+
 @app.get("/exercises/last", response_class=HTMLResponse)
 async def exercise_last_performance(request: Request, name: str = Query("")):
     if not name.strip():

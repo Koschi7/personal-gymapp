@@ -1,0 +1,79 @@
+<div class="exercise-history">
+    <div class="exercise-history-header">
+        <h3 class="exercise-history-title">{{ name }}</h3>
+        <button class="btn-icon-only btn-icon-close" onclick="document.getElementById('exercise-history-modal').innerHTML=''">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+        </button>
+    </div>
+
+    {% if history|length > 1 %}
+    <canvas id="exercise-chart" height="200"></canvas>
+    <script>
+    (function() {
+        const ctx = document.getElementById('exercise-chart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [{% for h in history %}'{{ h.date_fmt }}'{% if not loop.last %},{% endif %}{% endfor %}],
+                datasets: [{
+                    label: 'Max Gewicht (kg)',
+                    data: [{% for h in history %}{{ h.max_weight }}{% if not loop.last %},{% endif %}{% endfor %}],
+                    borderColor: '#0A84FF',
+                    backgroundColor: 'rgba(10, 132, 255, 0.1)',
+                    fill: true,
+                    tension: 0.3,
+                    pointRadius: 4,
+                    pointBackgroundColor: '#0A84FF',
+                }, {
+                    label: 'Volumen (kg)',
+                    data: [{% for h in history %}{{ h.volume }}{% if not loop.last %},{% endif %}{% endfor %}],
+                    borderColor: '#30D158',
+                    backgroundColor: 'rgba(48, 209, 88, 0.1)',
+                    fill: true,
+                    tension: 0.3,
+                    pointRadius: 4,
+                    pointBackgroundColor: '#30D158',
+                    yAxisID: 'y1',
+                }]
+            },
+            options: {
+                responsive: true,
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    legend: { labels: { color: '#8E8E93', font: { size: 12 } } }
+                },
+                scales: {
+                    x: {
+                        ticks: { color: '#8E8E93', font: { size: 10 }, maxRotation: 45 },
+                        grid: { color: 'rgba(255,255,255,0.06)' }
+                    },
+                    y: {
+                        position: 'left',
+                        ticks: { color: '#0A84FF', font: { size: 11 } },
+                        grid: { color: 'rgba(255,255,255,0.06)' },
+                        title: { display: true, text: 'kg', color: '#0A84FF' }
+                    },
+                    y1: {
+                        position: 'right',
+                        ticks: { color: '#30D158', font: { size: 11 } },
+                        grid: { drawOnChartArea: false },
+                        title: { display: true, text: 'Volumen', color: '#30D158' }
+                    }
+                }
+            }
+        });
+    })();
+    </script>
+    {% endif %}
+
+    <div class="exercise-history-list">
+        {% for h in history|reverse %}
+        <div class="exercise-row">
+            <span class="exercise-detail">{{ h.date_fmt }}</span>
+            <span class="exercise-detail">{{ h.max_weight }} kg &middot; {{ h.sets }} Sätze &middot; {{ h.total_reps }} Wdh.</span>
+        </div>
+        {% endfor %}
+    </div>
+</div>

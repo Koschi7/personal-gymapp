@@ -12,7 +12,11 @@
 {% if exercise_stats %}
 <div class="stats-list">
     {% for stat in exercise_stats %}
-    <div class="stat-row">
+    <div class="stat-row"
+         hx-get="/exercises/history/{{ stat.name | urlencode }}"
+         hx-target="#exercise-history-modal"
+         hx-swap="innerHTML"
+         style="cursor:pointer">
         <div class="stat-label-col">
             <span class="stat-label">{{ stat.name }}</span>
             <span class="stat-sublabel">{{ stat.body_part }}</span>
