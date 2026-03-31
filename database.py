@@ -6,7 +6,7 @@ from pathlib import Path
 
 DB_PATH = Path(__file__).parent / "data" / "gymapp.db"
 
-BODY_PARTS = ["Brust", "Rücken", "Schulter", "Nacken", "Bauch", "Beine"]
+BODY_PARTS = ["Brust", "Rücken", "Schulter", "Arme", "Nacken", "Bauch", "Beine"]
 
 GERMAN_MONTHS = [
     "", "Januar", "Februar", "März", "April", "Mai", "Juni",
