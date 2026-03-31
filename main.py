@@ -1,3 +1,5 @@
+import csv
+import io
 import os
 import shutil
 from contextlib import asynccontextmanager
@@ -5,7 +7,7 @@ from datetime import date
 from pathlib import Path
 
 from fastapi import FastAPI, Request, Form, UploadFile, File, Query
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
@@ -269,6 +271,32 @@ async def remove_weight(request: Request, weight_id: int):
             "history": history,
         })
     return RedirectResponse("/weight", status_code=303)
+
+
+# --- Export ---
+
+@app.get("/export/csv")
+async def export_csv():
+    workouts = await db.get_past_workouts(limit=10000)
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["Datum", "Übung", "Körperteil", "Gewicht (kg)", "Wdh.", "Satz"])
+    for w in workouts:
+        for ex in w["exercises"]:
+            writer.writerow([
+                w["date_fmt"],
+                ex["name"],
+                ex["body_part"],
+                ex["weight"],
+                ex["reps"],
+                ex.get("set_number", 1),
+            ])
+    output.seek(0)
+    return StreamingResponse(
+        iter([output.getvalue()]),
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=gymapp_export.csv"},
+    )
 
 
 # --- Profile ---
