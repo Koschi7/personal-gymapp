@@ -7,7 +7,7 @@
     {% if active_workout %}
     <!-- Active workout -->
     <div class="card">
-        <form hx-post="/training/add" hx-target="#current-exercises" hx-swap="innerHTML" hx-on::after-request="this.reset()">
+        <form hx-post="/training/add" hx-target="#current-exercises" hx-swap="innerHTML" hx-on::after-request="this.reset(); document.getElementById('last-performance').innerHTML=''">
             <input type="hidden" name="workout_id" value="{{ active_workout.id }}">
             <div class="form-row">
                 <select name="body_part" required class="input">
@@ -21,6 +21,7 @@
                 <input type="text" name="name" placeholder="Übung" required class="input" autocomplete="off" id="exercise-input">
                 <div class="ac-dropdown" id="ac-dropdown"></div>
             </div>
+            <div id="last-performance"></div>
             <div class="form-row form-row-half">
                 <input type="number" name="weight" placeholder="Gewicht (kg)" required class="input" step="0.5" min="0" inputmode="decimal">
                 <input type="number" name="reps" placeholder="Wdh." required class="input" min="1" inputmode="numeric">
@@ -132,6 +133,14 @@
         }, 150);
     });
 
+    function loadLastPerformance(name) {
+        const target = document.getElementById('last-performance');
+        if (!target || !name) return;
+        fetch('/exercises/last?name=' + encodeURIComponent(name))
+            .then(r => r.text())
+            .then(html => { target.innerHTML = html; });
+    }
+
     dropdown.addEventListener('click', function(e) {
         const item = e.target.closest('.ac-item');
         if (!item) return;
@@ -142,6 +151,7 @@
             select.value = item.dataset.bp;
         }
         dropdown.innerHTML = '';
+        loadLastPerformance(item.dataset.name);
         // Focus next field
         const weightInput = document.querySelector('input[name="weight"]');
         if (weightInput) weightInput.focus();

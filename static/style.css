@@ -779,6 +779,26 @@ select.input option {
     margin-left: 12px;
 }
 
+/* === Last Performance === */
+.last-performance {
+    padding: 8px 12px;
+    background: var(--accent-dim);
+    border-radius: 10px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.last-performance-label {
+    color: var(--accent);
+    font-weight: 600;
+    margin-right: 4px;
+}
+
+.last-performance-set {
+    color: var(--text);
+}
+
 /* === Stat sublabel (exercise name + body part) === */
 .stat-label-col {
     display: flex;

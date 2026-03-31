@@ -100,6 +100,19 @@ async def exercise_search(q: str = Query("")):
     return [{"name": r["name"], "body_part": r["body_part"]} for r in results]
 
 
+@app.get("/exercises/last", response_class=HTMLResponse)
+async def exercise_last_performance(request: Request, name: str = Query("")):
+    if not name.strip():
+        return HTMLResponse("")
+    sets = await db.get_last_performance(name.strip())
+    if not sets:
+        return HTMLResponse("")
+    return templates.TemplateResponse("partials/last_performance.html", {
+        "request": request,
+        "sets": sets,
+    })
+
+
 # --- Exercise Stats HTMX ---
 
 @app.get("/exercise-stats", response_class=HTMLResponse)

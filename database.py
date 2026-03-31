@@ -305,6 +305,28 @@ async def get_exercise_stats_filtered(period: str = "all") -> list[dict]:
         await db.close()
 
 
+async def get_last_performance(exercise_name: str) -> list[dict]:
+    """Get weight/reps from the most recent completed workout containing this exercise."""
+    db = await get_db()
+    try:
+        cursor = await db.execute("""
+            SELECT e.weight, e.reps FROM exercises e
+            JOIN workouts w ON e.workout_id = w.id
+            WHERE w.ended_at IS NOT NULL AND e.name = ?
+            AND w.id = (
+                SELECT w2.id FROM workouts w2
+                JOIN exercises e2 ON e2.workout_id = w2.id
+                WHERE w2.ended_at IS NOT NULL AND e2.name = ?
+                ORDER BY w2.started_at DESC LIMIT 1
+            )
+            ORDER BY e.created_at
+        """, (exercise_name, exercise_name))
+        rows = await cursor.fetchall()
+        return [dict(r) for r in rows]
+    finally:
+        await db.close()
+
+
 async def delete_exercise(exercise_id: int):
     db = await get_db()
     try:
