@@ -13,13 +13,18 @@ Most fitness apps are overloaded with features, require sign-ups, track you, or 
 ## Features
 
 - **Workout sessions** — Start a workout, log exercises, end it. Backdate to any day.
-- **Body part tracking** — Every exercise maps to a body part (Brust, Rücken, Schulter, Nacken, Bauch, Beine)
+- **Multiple sets per exercise** — Enter name and body part once, then add sets. Grouped display with set numbers.
+- **Body part tracking** — Every exercise maps to a body part (Brust, Rücken, Schulter, Arme, Nacken, Bauch, Beine)
 - **Exercise autocomplete** — Previously used exercises are suggested as you type, auto-filling the body part
+- **"Last time" lookup** — When selecting an exercise, see what weight × reps you did last time
+- **Personal records (PRs)** — Auto-detected when you beat your max weight. Gold banner + PR overview on dashboard.
+- **Exercise trend charts** — Tap any exercise to see weight and volume progression over time
 - **Statistics** — Body part and exercise distribution with percentages, filterable by time range (today, 7/30/90 days, all time)
 - **Training calendar** — Monthly view with training day dots. Tap a day to see the full workout.
 - **Weekly/monthly goals** — Set a weekly target, monthly is calculated automatically. Progress bars turn green when hit.
 - **Bodyweight tracking** — Manual input with a Chart.js line graph
 - **Profile** — Name, photo, weight, and goal settings
+- **Data export** — CSV and JSON export of all workout data
 - **Empty workout protection** — Warning before discarding a workout with no exercises
 
 ## Screenshots
