@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.4.0] - 2026-04-01
+
+### Added
+
+- "Letztes Mal" lookup: shows previous weight x reps when selecting an exercise from autocomplete
+- Multiple sets per exercise: enter name and body part once, then add sets underneath
+- Personal records (PRs): auto-detected when beating your max weight, shown on dashboard with gold "Neuer PR!" banner
+- Exercise trend charts: tap any exercise in stats or PRs to see weight and volume progression over time (Chart.js)
+- CSV and JSON data export on profile page
+- "Arme" (arms) added to body part options
+
+### Changed
+
+- Exercise form keeps name and body part after adding a set for faster multi-set entry
+- Exercises grouped by name with set numbers (Satz 1, Satz 2, etc.) across all views
+- Chart.js moved to base template for global availability
+
 ## [1.3.1] - 2026-03-28
 
 ### Changed
