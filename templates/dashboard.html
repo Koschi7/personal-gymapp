@@ -74,6 +74,22 @@
         </div>
     </div>
 
+    <!-- Personal Records -->
+    {% if personal_records %}
+    <div class="card">
+        <div class="card-label">Persönliche Rekorde</div>
+        {% for pr in personal_records %}
+        <div class="exercise-row">
+            <div class="exercise-info">
+                <span class="exercise-name">{{ pr.name }}</span>
+                <span class="exercise-detail">{{ pr.body_part }}</span>
+            </div>
+            <span class="pr-weight">{{ pr.max_weight }} kg</span>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
     <!-- Last Workout -->
     {% if last_workout %}
     <div class="card">

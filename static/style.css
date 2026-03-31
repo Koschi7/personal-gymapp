@@ -779,6 +779,32 @@ select.input option {
     margin-left: 12px;
 }
 
+/* === PR Banner === */
+.pr-banner {
+    background: linear-gradient(135deg, #FFD60A, #FF9F0A);
+    color: #000;
+    font-weight: 700;
+    font-size: 15px;
+    text-align: center;
+    padding: 12px 16px;
+    border-radius: var(--radius);
+    margin-bottom: 12px;
+    animation: prPulse 0.6s ease-out;
+}
+
+@keyframes prPulse {
+    0% { transform: scale(0.9); opacity: 0; }
+    50% { transform: scale(1.03); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.pr-weight {
+    color: #FFD60A;
+    font-weight: 700;
+    font-size: 15px;
+    white-space: nowrap;
+}
+
 /* === Exercise Groups (Sets) === */
 .exercise-group {
     margin-bottom: 12px;

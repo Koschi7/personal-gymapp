@@ -47,6 +47,7 @@ async def dashboard(request: Request):
     if active_workout:
         active_exercises = await db.get_workout_exercises(active_workout["id"])
         active_workout["started_fmt"] = db.format_datetime(active_workout["started_at"])
+    personal_records = await db.get_personal_records()
     today = date.today()
     cal = await db.get_calendar_data(today.year, today.month)
     return templates.TemplateResponse("dashboard.html", {
@@ -59,6 +60,7 @@ async def dashboard(request: Request):
         "exercise_stats": exercise_stats,
         "active_workout": active_workout,
         "active_exercises": active_exercises,
+        "personal_records": personal_records,
         "cal": cal,
         "active_period": "all",
         "active": "dashboard",
@@ -188,6 +190,10 @@ async def add_exercise(
     weight: float = Form(...),
     reps: int = Form(...),
 ):
+    # Check for PR before adding (so we compare against previous max)
+    prev_max = await db.get_max_weight(name)
+    is_pr = prev_max is not None and weight > prev_max
+
     await db.add_exercise(workout_id, name, body_part, weight, reps)
     if is_htmx(request):
         exercises = await db.get_workout_exercises(workout_id)
@@ -195,6 +201,7 @@ async def add_exercise(
             "request": request,
             "exercises": exercises,
             "exercise_groups": db.group_exercises(exercises),
+            "new_pr": {"name": name, "weight": weight} if is_pr else None,
         })
     return RedirectResponse("/training", status_code=303)
 

@@ -334,6 +334,40 @@ async def get_exercise_stats_filtered(period: str = "all") -> list[dict]:
         await db.close()
 
 
+async def get_max_weight(exercise_name: str) -> float | None:
+    """Get the all-time max weight for an exercise (from completed workouts only)."""
+    db = await get_db()
+    try:
+        cursor = await db.execute("""
+            SELECT MAX(e.weight) as max_weight FROM exercises e
+            JOIN workouts w ON e.workout_id = w.id
+            WHERE w.ended_at IS NOT NULL AND e.name = ?
+        """, (exercise_name,))
+        row = await cursor.fetchone()
+        return row["max_weight"] if row and row["max_weight"] is not None else None
+    finally:
+        await db.close()
+
+
+async def get_personal_records(limit: int = 10) -> list[dict]:
+    """Get top PRs (max weight per exercise) from completed workouts."""
+    db = await get_db()
+    try:
+        cursor = await db.execute("""
+            SELECT e.name, e.body_part, MAX(e.weight) as max_weight, MAX(e.reps) as best_reps
+            FROM exercises e
+            JOIN workouts w ON e.workout_id = w.id
+            WHERE w.ended_at IS NOT NULL
+            GROUP BY e.name
+            ORDER BY max_weight DESC
+            LIMIT ?
+        """, (limit,))
+        rows = await cursor.fetchall()
+        return [dict(r) for r in rows]
+    finally:
+        await db.close()
+
+
 async def get_last_performance(exercise_name: str) -> list[dict]:
     """Get weight/reps from the most recent completed workout containing this exercise."""
     db = await get_db()
