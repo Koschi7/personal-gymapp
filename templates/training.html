@@ -7,7 +7,8 @@
     {% if active_workout %}
     <!-- Active workout -->
     <div class="card">
-        <form hx-post="/training/add" hx-target="#current-exercises" hx-swap="innerHTML" hx-on::after-request="this.reset(); document.getElementById('last-performance').innerHTML=''">
+        <form hx-post="/training/add" hx-target="#current-exercises" hx-swap="innerHTML"
+              hx-on::after-request="var n=this.querySelector('[name=name]'),b=this.querySelector('[name=body_part]'),nv=n.value,bv=b.value;this.querySelector('[name=weight]').value='';this.querySelector('[name=reps]').value='';n.value=nv;b.value=bv;this.querySelector('[name=weight]').focus()">
             <input type="hidden" name="workout_id" value="{{ active_workout.id }}">
             <div class="form-row">
                 <select name="body_part" required class="input">
@@ -90,12 +91,17 @@
                 </div>
             </div>
         </div>
-        {% for ex in w.exercises %}
-        <div class="exercise-row">
-            <div class="exercise-info">
-                <span class="exercise-name">{{ ex.name }}</span>
-                <span class="exercise-detail">{{ ex.body_part }} &middot; {{ ex.weight }} kg &middot; {{ ex.reps }} Wdh.</span>
+        {% for group in w.exercise_groups %}
+        <div class="exercise-group">
+            <div class="exercise-group-header">
+                <span class="exercise-name">{{ group.name }}</span>
+                <span class="tag tag-sm">{{ group.body_part }}</span>
             </div>
+            {% for ex in group.sets %}
+            <div class="exercise-row exercise-set-row">
+                <span class="exercise-detail">Satz {{ loop.index }}: {{ ex.weight }} kg x {{ ex.reps }} Wdh.</span>
+            </div>
+            {% endfor %}
         </div>
         {% endfor %}
     </div>

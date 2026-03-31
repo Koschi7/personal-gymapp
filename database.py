@@ -65,6 +65,13 @@ async def init_db():
             CREATE INDEX IF NOT EXISTS idx_workouts_started ON workouts(started_at);
             CREATE INDEX IF NOT EXISTS idx_weight_date ON weight_log(date);
         """)
+
+        # Migration: add set_number column if missing
+        cursor = await db.execute("PRAGMA table_info(exercises)")
+        columns = [row[1] for row in await cursor.fetchall()]
+        if "set_number" not in columns:
+            await db.execute("ALTER TABLE exercises ADD COLUMN set_number INTEGER NOT NULL DEFAULT 1")
+
         await db.commit()
     finally:
         await db.close()
@@ -122,6 +129,18 @@ async def update_profile(name: str | None = None, picture: str | None = None,
             await db.commit()
     finally:
         await db.close()
+
+
+def group_exercises(exercises: list[dict]) -> list[dict]:
+    """Group exercises by name, preserving insertion order."""
+    groups = {}
+    order = []
+    for ex in exercises:
+        if ex["name"] not in groups:
+            order.append(ex["name"])
+            groups[ex["name"]] = {"name": ex["name"], "body_part": ex["body_part"], "sets": []}
+        groups[ex["name"]]["sets"].append(ex)
+    return [groups[name] for name in order]
 
 
 # --- Workouts ---
@@ -183,6 +202,7 @@ async def get_past_workouts(limit: int = 20) -> list[dict]:
                 (w["id"],)
             )
             w["exercises"] = [dict(r) for r in await ex_cursor.fetchall()]
+            w["exercise_groups"] = group_exercises(w["exercises"])
             w["body_parts"] = sorted(set(e["body_part"] for e in w["exercises"]))
             w["started_fmt"] = format_datetime(w["started_at"])
             w["date_fmt"] = format_date(w["started_at"])
@@ -206,6 +226,7 @@ async def get_workouts_for_date(iso_date: str) -> list[dict]:
                 (w["id"],)
             )
             w["exercises"] = [dict(r) for r in await ex_cursor.fetchall()]
+            w["exercise_groups"] = group_exercises(w["exercises"])
             w["body_parts"] = sorted(set(e["body_part"] for e in w["exercises"]))
             w["started_fmt"] = format_datetime(w["started_at"])
             w["date_fmt"] = format_date(w["started_at"])
@@ -228,9 +249,17 @@ async def delete_workout(workout_id: int):
 async def add_exercise(workout_id: int, name: str, body_part: str, weight: float, reps: int) -> dict:
     db = await get_db()
     try:
+        # Auto-calculate set number
+        cnt_cursor = await db.execute(
+            "SELECT COUNT(*) as cnt FROM exercises WHERE workout_id = ? AND name = ?",
+            (workout_id, name)
+        )
+        cnt_row = await cnt_cursor.fetchone()
+        set_number = (cnt_row["cnt"] if cnt_row else 0) + 1
+
         cursor = await db.execute(
-            "INSERT INTO exercises (workout_id, name, body_part, weight, reps) VALUES (?, ?, ?, ?, ?)",
-            (workout_id, name, body_part, weight, reps)
+            "INSERT INTO exercises (workout_id, name, body_part, weight, reps, set_number) VALUES (?, ?, ?, ?, ?, ?)",
+            (workout_id, name, body_part, weight, reps, set_number)
         )
         await db.commit()
         row_cursor = await db.execute("SELECT * FROM exercises WHERE id = ?", (cursor.lastrowid,))
@@ -244,7 +273,7 @@ async def get_workout_exercises(workout_id: int) -> list[dict]:
     db = await get_db()
     try:
         cursor = await db.execute(
-            "SELECT * FROM exercises WHERE workout_id = ? ORDER BY created_at DESC",
+            "SELECT * FROM exercises WHERE workout_id = ? ORDER BY created_at ASC",
             (workout_id,)
         )
         rows = await cursor.fetchall()
@@ -418,6 +447,7 @@ async def get_last_workout() -> dict | None:
             (w["id"],)
         )
         w["exercises"] = [dict(r) for r in await ex_cursor.fetchall()]
+        w["exercise_groups"] = group_exercises(w["exercises"])
         w["body_parts"] = sorted(set(e["body_part"] for e in w["exercises"]))
         w["date_fmt"] = format_date(w["started_at"])
         return w

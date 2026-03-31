@@ -84,10 +84,17 @@
             <span class="tag tag-sm">{{ bp }}</span>
             {% endfor %}
         </div>
-        {% for ex in last_workout.exercises %}
-        <div class="exercise-row">
-            <span class="exercise-name">{{ ex.name }}</span>
-            <span class="exercise-detail">{{ ex.weight }} kg &middot; {{ ex.reps }} Wdh.</span>
+        {% for group in last_workout.exercise_groups %}
+        <div class="exercise-group">
+            <div class="exercise-group-header">
+                <span class="exercise-name">{{ group.name }}</span>
+                <span class="tag tag-sm">{{ group.body_part }}</span>
+            </div>
+            {% for ex in group.sets %}
+            <div class="exercise-row exercise-set-row">
+                <span class="exercise-detail">Satz {{ loop.index }}: {{ ex.weight }} kg x {{ ex.reps }} Wdh.</span>
+            </div>
+            {% endfor %}
         </div>
         {% endfor %}
     </div>

@@ -150,6 +150,7 @@ async def training_page(request: Request):
         "request": request,
         "active_workout": active_workout,
         "exercises": exercises,
+        "exercise_groups": db.group_exercises(exercises),
         "past_workouts": past_workouts,
         "body_parts": db.BODY_PARTS,
         "today": date.today().isoformat(),
@@ -193,6 +194,7 @@ async def add_exercise(
         return templates.TemplateResponse("partials/current_exercises.html", {
             "request": request,
             "exercises": exercises,
+            "exercise_groups": db.group_exercises(exercises),
         })
     return RedirectResponse("/training", status_code=303)
 
@@ -205,6 +207,7 @@ async def remove_exercise(request: Request, exercise_id: int, workout_id: int = 
         return templates.TemplateResponse("partials/current_exercises.html", {
             "request": request,
             "exercises": exercises,
+            "exercise_groups": db.group_exercises(exercises),
         })
     return RedirectResponse("/training", status_code=303)
 
