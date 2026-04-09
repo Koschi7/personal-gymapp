@@ -20,6 +20,7 @@
     --radius: 14px;
     --radius-sm: 10px;
     --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-top: env(safe-area-inset-top, 0px);
 }
 
 html {
@@ -33,6 +34,7 @@ html {
 
 body {
     min-height: 100dvh;
+    padding-top: var(--safe-top);
     padding-bottom: calc(80px + var(--safe-bottom));
     overscroll-behavior: none;
 }
