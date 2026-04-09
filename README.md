@@ -26,6 +26,7 @@ Most fitness apps are overloaded with features, require sign-ups, track you, or 
 - **Profile** — Name, photo, weight, and goal settings
 - **Data export** — CSV and JSON export of all workout data
 - **Empty workout protection** — Warning before discarding a workout with no exercises
+- **PWA support** — Install on iPhone via "Add to Home Screen" for a native app experience (no Safari toolbar)
 
 ## Screenshots
 

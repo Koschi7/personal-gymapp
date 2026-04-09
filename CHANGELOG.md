@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.5.0] - 2026-04-08
+
+### Added
+
+- Progressive Web App (PWA) support: installable on iPhone via "Add to Home Screen"
+- Web app manifest with app icons
+- Service worker for offline caching
+- Apple touch icon for home screen
+
 ## [1.4.0] - 2026-04-01
 
 ### Added
