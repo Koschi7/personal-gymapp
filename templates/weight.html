@@ -1,7 +1,8 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="page">
+<div class="page stagger">
+    <div class="page-kicker">Körpergewicht</div>
     <h1 class="page-title">Gewicht</h1>
 
     <div id="weight-content">
@@ -9,11 +10,12 @@
     </div>
 
     <div class="card">
+        <div class="card-title">Neuen Eintrag</div>
         <form hx-post="/weight" hx-target="#weight-content" hx-swap="innerHTML" hx-on::after-request="this.reset()">
-            <div class="form-row form-row-inline">
-                <input type="number" name="weight" placeholder="Gewicht (kg)" required class="input" step="0.1" min="30" max="300" inputmode="decimal">
-                <button type="submit" class="btn">Speichern</button>
+            <div class="field">
+                <input type="number" name="weight" placeholder="Gewicht in kg" required class="input" step="0.1" min="30" max="300" inputmode="decimal">
             </div>
+            <button type="submit" class="btn btn-full">Speichern</button>
         </form>
     </div>
 </div>

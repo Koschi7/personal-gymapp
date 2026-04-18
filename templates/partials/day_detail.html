@@ -1,29 +1,41 @@
+{% set bp_slugs = {
+    'Brust': 'brust', 'Rücken': 'ruecken', 'Schulter': 'schulter',
+    'Arme': 'arme', 'Nacken': 'nacken', 'Bauch': 'bauch', 'Beine': 'beine'
+} %}
+
 {% if workouts %}
 <div class="day-detail">
-    <div class="day-detail-header">
+    <div class="day-detail-head">
         <span class="day-detail-date">{{ date_fmt }}</span>
-        <button class="btn-icon-only btn-icon-close" onclick="this.closest('.day-detail').remove()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <button class="icon-btn" onclick="this.closest('.day-detail').remove()" aria-label="Schließen">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
             </svg>
         </button>
     </div>
     {% for w in workouts %}
     <div class="day-detail-workout">
-        <div class="body-part-tags">
+        {% if w.body_parts %}
+        <div class="bp-chips">
             {% for bp in w.body_parts %}
-            <span class="tag tag-sm">{{ bp }}</span>
+            <span class="bp-chip {{ bp_slugs.get(bp, '') }}">{{ bp }}</span>
             {% endfor %}
         </div>
+        {% endif %}
         {% for group in w.exercise_groups %}
-        <div class="exercise-group">
-            <div class="exercise-group-header">
-                <span class="exercise-name">{{ group.name }}</span>
-                <span class="tag tag-sm">{{ group.body_part }}</span>
+        <div class="ex-group">
+            <div class="ex-group-head">
+                <span class="ex-group-title">{{ group.name }}</span>
+                <span class="bp-chip {{ bp_slugs.get(group.body_part, '') }}">{{ group.body_part }}</span>
             </div>
             {% for ex in group.sets %}
-            <div class="exercise-row exercise-set-row">
-                <span class="exercise-detail">Satz {{ loop.index }}: {{ ex.weight }} kg x {{ ex.reps }} Wdh.</span>
+            <div class="ex-set">
+                <span class="ex-set-idx">{{ loop.index }}</span>
+                <span class="ex-set-val" style="flex:1">
+                    <span>{{ ex.weight }}</span><span class="unit">kg</span>
+                    <span class="times">×</span>
+                    <span>{{ ex.reps }}</span>
+                </span>
             </div>
             {% endfor %}
         </div>
@@ -33,10 +45,10 @@
 </div>
 {% else %}
 <div class="day-detail">
-    <div class="day-detail-header">
+    <div class="day-detail-head">
         <span class="day-detail-date">{{ date_fmt }}</span>
-        <button class="btn-icon-only btn-icon-close" onclick="this.closest('.day-detail').remove()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <button class="icon-btn" onclick="this.closest('.day-detail').remove()" aria-label="Schließen">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
             </svg>
         </button>

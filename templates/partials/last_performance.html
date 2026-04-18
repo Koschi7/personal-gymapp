@@ -1,6 +1,6 @@
-<div class="last-performance">
-    <span class="last-performance-label">Letztes Mal:</span>
-    {% for s in sets %}
-    <span class="last-performance-set">{{ s.weight }} kg x {{ s.reps }}</span>{% if not loop.last %}, {% endif %}
-    {% endfor %}
+<div class="last-perf">
+    <span class="last-perf-label">Letztes Mal</span>
+    <span class="last-perf-vals">
+        {% for s in sets %}{{ s.weight }}×{{ s.reps }}{% if not loop.last %} · {% endif %}{% endfor %}
+    </span>
 </div>

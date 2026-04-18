@@ -1,138 +1,199 @@
 {% extends "base.html" %}
 
+{% set bp_slugs = {
+    'Brust': 'brust', 'Rücken': 'ruecken', 'Schulter': 'schulter',
+    'Arme': 'arme', 'Nacken': 'nacken', 'Bauch': 'bauch', 'Beine': 'beine'
+} %}
+
+{% set week_pct = ((days_week / profile.goal_days_week * 100) | round | int) if profile.goal_days_week > 0 else 0 %}
+{% set month_pct = ((days_month / profile.goal_days_month * 100) | round | int) if profile.goal_days_month > 0 else 0 %}
+{% set week_pct_clamped = [week_pct, 100] | min %}
+{% set month_pct_clamped = [month_pct, 100] | min %}
+
 {% block content %}
-<div class="page">
-    <div class="page-header">
+<div class="page stagger">
+    <!-- Greeting -->
+    <header class="greeting">
         {% if profile.picture %}
-        <img src="/uploads/{{ profile.picture }}" alt="Profil" class="avatar avatar-lg">
+        <img src="/uploads/{{ profile.picture }}" alt="" class="greeting-avatar">
         {% else %}
-        <div class="avatar avatar-lg avatar-placeholder">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 00-16 0"/>
+        <div class="greeting-avatar placeholder">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="8" r="4"/><path d="M4 21v-1c0-3.3 3.6-6 8-6s8 2.7 8 6v1"/>
             </svg>
         </div>
         {% endif %}
-        <h1>Hallo{% if profile.name %}, {{ profile.name }}{% endif %}</h1>
-    </div>
+        <div class="greeting-text">
+            <span class="greeting-date" id="greeting-date"></span>
+            <span class="greeting-name">Hallo{% if profile.name %}, {{ profile.name.split(' ')[0] }}{% endif %}</span>
+        </div>
+    </header>
 
+    <!-- Active workout — highest priority when active -->
     {% if active_workout %}
-    <div class="card card-active-workout">
-        <div class="card-label">Aktives Training</div>
-        <div class="active-workout-info">
-            <span>Gestartet {{ active_workout.started_fmt }}</span>
-            {% if active_exercises %}
-            <span class="exercise-detail">{{ active_exercises | length }} Übungen</span>
-            {% endif %}
+    <div class="live-banner">
+        <span class="live-pulse"></span>
+        <div class="live-content">
+            <div class="live-label">Aktives Training</div>
+            <div class="live-meta">
+                {{ active_workout.started_fmt }}{% if active_exercises %} · <span class="num">{{ active_exercises | length }}</span> Übungen{% endif %}
+            </div>
         </div>
-        <div class="active-workout-actions">
-            <a href="/training" class="btn btn-small">Weiter trainieren</a>
-            <form action="/training/end/{{ active_workout.id }}" method="post" style="display:inline">
-                <button type="submit" class="btn btn-small btn-danger">Beenden</button>
-            </form>
-        </div>
+        <a href="/training" class="btn btn-sm">Weiter</a>
     </div>
     {% endif %}
 
-    <!-- Goal Progress -->
-    <div class="card">
-        <div class="card-label">Diese Woche</div>
-        <div class="progress-row">
-            <div class="progress-bar-wrap">
-                {% set pct_week = ((days_week / profile.goal_days_week * 100) | round | int) if profile.goal_days_week > 0 else 0 %}
-                {% set pct_week = [pct_week, 100] | min %}
-                <div class="progress-bar {% if pct_week >= 100 %}progress-bar-done{% endif %}" style="width: {{ pct_week }}%"></div>
+    <!-- Activity ring: week/month progress at a glance -->
+    <section class="ring-card">
+        <div class="ring-wrap">
+            <svg viewBox="0 0 120 120">
+                <circle class="ring-track" cx="60" cy="60" r="52" stroke-width="9"/>
+                <circle class="ring-fill" cx="60" cy="60" r="52" stroke-width="9"
+                        stroke="url(#gMonth)"
+                        stroke-dasharray="326.7"
+                        stroke-dashoffset="{{ 326.7 * (1 - month_pct_clamped / 100) }}"/>
+                <circle class="ring-track" cx="60" cy="60" r="38" stroke-width="9"/>
+                <circle class="ring-fill" cx="60" cy="60" r="38" stroke-width="9"
+                        stroke="url(#gWeek)"
+                        stroke-dasharray="238.8"
+                        stroke-dashoffset="{{ 238.8 * (1 - week_pct_clamped / 100) }}"/>
+                <defs>
+                    <linearGradient id="gWeek" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stop-color="#FF9F0A"/>
+                        <stop offset="100%" stop-color="#FFD60A"/>
+                    </linearGradient>
+                    <linearGradient id="gMonth" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stop-color="#0A84FF"/>
+                        <stop offset="100%" stop-color="#5E5CE6"/>
+                    </linearGradient>
+                </defs>
+            </svg>
+            <div class="ring-center">
+                <span class="ring-num">{{ week_pct }}<span class="pct">%</span></span>
+                <span class="ring-label">Ziel Woche</span>
             </div>
-            <span class="progress-text">{{ days_week }} / {{ profile.goal_days_week }}</span>
         </div>
-    </div>
-
-    <div class="card">
-        <div class="card-label">Dieser Monat</div>
-        <div class="progress-row">
-            <div class="progress-bar-wrap">
-                {% set pct_month = ((days_month / profile.goal_days_month * 100) | round | int) if profile.goal_days_month > 0 else 0 %}
-                {% set pct_month = [pct_month, 100] | min %}
-                <div class="progress-bar {% if pct_month >= 100 %}progress-bar-done{% endif %}" style="width: {{ pct_month }}%"></div>
+        <div class="ring-legend">
+            <div class="ring-item">
+                <span class="ring-item-label"><span class="ring-dot" style="background:#FFB00A"></span>Woche</span>
+                <span class="ring-item-value">{{ days_week }}<span class="num-of">/{{ profile.goal_days_week }}</span></span>
             </div>
-            <span class="progress-text">{{ days_month }} / {{ profile.goal_days_month }}</span>
-        </div>
-    </div>
-
-    <!-- Body Part Stats -->
-    <div class="card">
-        <div class="card-label">Körperteile</div>
-        <div id="stats-section">
-            {% include "partials/stats_section.html" %}
-        </div>
-    </div>
-
-    <!-- Exercise Stats -->
-    <div class="card">
-        <div class="card-label">Übungen</div>
-        <div id="exercise-stats-section">
-            {% include "partials/exercise_stats.html" %}
-        </div>
-    </div>
-
-    <!-- Personal Records -->
-    {% if personal_records %}
-    <div class="card">
-        <div class="card-label">Persönliche Rekorde</div>
-        {% for pr in personal_records %}
-        <div class="exercise-row"
-             hx-get="/exercises/history/{{ pr.name | urlencode }}"
-             hx-target="#exercise-history-modal"
-             hx-swap="innerHTML"
-             style="cursor:pointer">
-            <div class="exercise-info">
-                <span class="exercise-name">{{ pr.name }}</span>
-                <span class="exercise-detail">{{ pr.body_part }}</span>
+            <div class="ring-item">
+                <span class="ring-item-label"><span class="ring-dot" style="background:#0A84FF"></span>Monat</span>
+                <span class="ring-item-value">{{ days_month }}<span class="num-of">/{{ profile.goal_days_month }}</span></span>
             </div>
-            <span class="pr-weight">{{ pr.max_weight }} kg</span>
         </div>
-        {% endfor %}
-    </div>
-    {% endif %}
+    </section>
 
-    <!-- Last Workout -->
-    {% if last_workout %}
-    <div class="card">
-        <div class="card-label">Letztes Training</div>
-        <div class="card-subtitle">
-            {{ last_workout.date_fmt }}
+    <!-- Letztes Training — HIGH priority: what did I do last time? -->
+    {% if last_workout and not active_workout %}
+    {% set last_total_sets = last_workout.exercise_groups | map(attribute='sets') | map('length') | sum %}
+    <section class="section">
+        <div class="section-head">
+            <h2>Letztes Training</h2>
+            <span class="section-meta">{{ last_workout.date_fmt }} · {{ last_total_sets }} Sätze</span>
+        </div>
+        <div class="bp-chips" style="margin-bottom:4px">
             {% for bp in last_workout.body_parts %}
-            <span class="tag tag-sm">{{ bp }}</span>
+            <span class="bp-chip {{ bp_slugs.get(bp, '') }}">{{ bp }}</span>
             {% endfor %}
         </div>
         {% for group in last_workout.exercise_groups %}
-        <div class="exercise-group">
-            <div class="exercise-group-header">
-                <span class="exercise-name">{{ group.name }}</span>
-                <span class="tag tag-sm">{{ group.body_part }}</span>
+        <div class="ex-group">
+            <div class="ex-group-head">
+                <span class="ex-group-title">{{ group.name }}</span>
+                <span class="bp-chip {{ bp_slugs.get(group.body_part, '') }}">{{ group.body_part }}</span>
             </div>
             {% for ex in group.sets %}
-            <div class="exercise-row exercise-set-row">
-                <span class="exercise-detail">Satz {{ loop.index }}: {{ ex.weight }} kg x {{ ex.reps }} Wdh.</span>
+            <div class="ex-set">
+                <span class="ex-set-idx">{{ loop.index }}</span>
+                <span class="ex-set-val" style="flex:1">
+                    <span>{{ ex.weight }}</span><span class="unit">kg</span>
+                    <span class="times">×</span>
+                    <span>{{ ex.reps }}</span>
+                </span>
             </div>
             {% endfor %}
         </div>
         {% endfor %}
-    </div>
-    {% elif not active_workout %}
-    <div class="card card-empty">
-        <p>Noch kein Training abgeschlossen.</p>
-        <a href="/training" class="btn">Training starten</a>
-    </div>
+    </section>
+    {% elif not last_workout and not active_workout %}
+    <section class="section">
+        <div class="empty">
+            <div class="empty-ill">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2.5" y="10" width="2" height="4" rx="1"/><rect x="5.5" y="7.5" width="2.5" height="9" rx="1"/><rect x="16" y="7.5" width="2.5" height="9" rx="1"/><rect x="19.5" y="10" width="2" height="4" rx="1"/><line x1="8" y1="12" x2="16" y2="12"/>
+                </svg>
+            </div>
+            <span class="empty-title">Noch kein Training</span>
+            <span class="empty-sub">Starte dein erstes Training und halte deinen Fortschritt fest.</span>
+            <a href="/training" class="btn">Training starten</a>
+        </div>
+    </section>
     {% endif %}
 
-    <!-- Exercise History Modal -->
+    <!-- Exercise history modal target -->
     <div id="exercise-history-modal" hx-on::after-settle="if(this.children.length) this.scrollIntoView({behavior:'smooth', block:'start'})"></div>
 
-    <!-- Calendar (compact, at the bottom) -->
-    <div class="card card-compact">
+    <!-- Kalender — for finding past workouts -->
+    <section class="section">
+        <div class="section-head">
+            <h2>Kalender</h2>
+        </div>
         <div id="calendar-wrap">
             {% include "partials/calendar.html" %}
         </div>
-    </div>
+    </section>
+
+    <!-- Körperteile — where did my volume go? -->
+    <section class="section">
+        <div class="section-head"><h2>Körperteile</h2></div>
+        <div id="stats-section">
+            {% include "partials/stats_section.html" %}
+        </div>
+    </section>
+
+    <!-- Übungen — which exercises, how often -->
+    <section class="section">
+        <div class="section-head"><h2>Übungen</h2></div>
+        <div id="exercise-stats-section">
+            {% include "partials/exercise_stats.html" %}
+        </div>
+    </section>
+
+    <!-- Rekorde — motivation, low priority -->
+    {% if personal_records %}
+    <section class="section">
+        <div class="section-head">
+            <h2>Rekorde</h2>
+            <span class="section-meta">{{ personal_records | length }} gesamt</span>
+        </div>
+        <div class="row-list">
+            {% for pr in personal_records[:3] %}
+            <div class="row row-tap"
+                 hx-get="/exercises/history/{{ pr.name | urlencode }}"
+                 hx-target="#exercise-history-modal"
+                 hx-swap="innerHTML">
+                <div class="row-main">
+                    <span class="row-title">{{ pr.name }}</span>
+                    <span class="bp-chip {{ bp_slugs.get(pr.body_part, '') }}">{{ pr.body_part }}</span>
+                </div>
+                <span class="pr-weight">{{ pr.max_weight }}<span style="font-size:12px;color:var(--text-3);font-weight:500;margin-left:2px">kg</span></span>
+                <svg class="row-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
 </div>
+
+<script>
+(function() {
+    const weekdays = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
+    const months = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+    const d = new Date();
+    const el = document.getElementById('greeting-date');
+    if (el) el.textContent = `${weekdays[d.getDay()]}, ${d.getDate()}. ${months[d.getMonth()]}`;
+})();
+</script>
 {% endblock %}

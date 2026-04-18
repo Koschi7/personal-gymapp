@@ -1,6 +1,10 @@
+{% set bp_slugs = {
+    'Brust': 'brust', 'Rücken': 'ruecken', 'Schulter': 'schulter',
+    'Arme': 'arme', 'Nacken': 'nacken', 'Bauch': 'bauch', 'Beine': 'beine'
+} %}
 <div class="filter-pills">
-    {% for key, label in [("today", "Heute"), ("7days", "7 Tage"), ("30days", "30 Tage"), ("90days", "90 Tage"), ("all", "Gesamt")] %}
-    <button class="pill {% if active_period == key %}pill-active{% endif %}"
+    {% for key, label in [("today", "Heute"), ("7days", "7 T"), ("30days", "30 T"), ("90days", "90 T"), ("all", "Gesamt")] %}
+    <button class="pill {% if active_period == key %}active{% endif %}"
             hx-get="/exercise-stats?period={{ key }}"
             hx-target="#exercise-stats-section"
             hx-swap="innerHTML">
@@ -12,21 +16,22 @@
 {% if exercise_stats %}
 <div class="stats-list">
     {% for stat in exercise_stats %}
-    <div class="stat-row"
+    {% set max_count = exercise_stats[0].count %}
+    <div class="stat-row row-tap"
          hx-get="/exercises/history/{{ stat.name | urlencode }}"
          hx-target="#exercise-history-modal"
-         hx-swap="innerHTML"
-         style="cursor:pointer">
+         hx-swap="innerHTML">
         <div class="stat-label-col">
             <span class="stat-label">{{ stat.name }}</span>
             <span class="stat-sublabel">{{ stat.body_part }}</span>
         </div>
         <div class="stat-bar-wrap">
-            {% set max_count = exercise_stats[0].count %}
-            <div class="stat-bar" style="width: {{ (stat.count / max_count * 100) | round }}%"></div>
+            <div class="stat-bar {{ bp_slugs.get(stat.body_part, 'default') }}" style="width: {{ (stat.count / max_count * 100) | round }}%"></div>
         </div>
-        <span class="stat-count">{{ stat.count }}x</span>
-        <span class="stat-pct">{{ stat.pct }}%</span>
+        <div class="stat-end">
+            <span class="stat-count">{{ stat.count }}</span>
+            <span class="stat-pct">{{ stat.pct }}%</span>
+        </div>
     </div>
     {% endfor %}
 </div>
