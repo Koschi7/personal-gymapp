@@ -1,65 +1,100 @@
-<div class="exercise-history">
-    <div class="exercise-history-header">
-        <h3 class="exercise-history-title">{{ name }}</h3>
-        <button class="btn-icon-only btn-icon-close" onclick="document.getElementById('exercise-history-modal').innerHTML=''">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+<div class="ex-history">
+    <div class="ex-history-head">
+        <h3 class="ex-history-title">{{ name }}</h3>
+        <button class="icon-btn" onclick="document.getElementById('exercise-history-modal').innerHTML=''" aria-label="Schließen">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
             </svg>
         </button>
     </div>
 
     {% if history|length > 1 %}
-    <canvas id="exercise-chart" height="200"></canvas>
+    <div class="ex-history-chart-box">
+        <canvas id="exercise-chart"></canvas>
+    </div>
     <script>
     (function() {
-        const ctx = document.getElementById('exercise-chart').getContext('2d');
+        const canvas = document.getElementById('exercise-chart');
+        const ctx = canvas.getContext('2d');
+        const h = canvas.parentElement.clientHeight || 200;
+        const grad = ctx.createLinearGradient(0, 0, 0, h);
+        grad.addColorStop(0, 'rgba(10, 132, 255, 0.22)');
+        grad.addColorStop(1, 'rgba(10, 132, 255, 0)');
+
         new Chart(ctx, {
             type: 'line',
             data: {
                 labels: [{% for h in history %}'{{ h.date_fmt }}'{% if not loop.last %},{% endif %}{% endfor %}],
                 datasets: [{
-                    label: 'Max Gewicht (kg)',
+                    label: 'Max kg',
                     data: [{% for h in history %}{{ h.max_weight }}{% if not loop.last %},{% endif %}{% endfor %}],
                     borderColor: '#0A84FF',
-                    backgroundColor: 'rgba(10, 132, 255, 0.1)',
+                    backgroundColor: grad,
                     fill: true,
-                    tension: 0.3,
-                    pointRadius: 4,
-                    pointBackgroundColor: '#0A84FF',
+                    tension: 0.35,
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    pointHoverRadius: 5,
+                    pointHoverBackgroundColor: '#0A84FF',
+                    pointHoverBorderColor: '#fff',
+                    pointHoverBorderWidth: 2,
                 }, {
-                    label: 'Volumen (kg)',
+                    label: 'Volumen',
                     data: [{% for h in history %}{{ h.volume }}{% if not loop.last %},{% endif %}{% endfor %}],
                     borderColor: '#30D158',
-                    backgroundColor: 'rgba(48, 209, 88, 0.1)',
-                    fill: true,
-                    tension: 0.3,
-                    pointRadius: 4,
-                    pointBackgroundColor: '#30D158',
+                    borderDash: [3, 4],
+                    backgroundColor: 'transparent',
+                    fill: false,
+                    tension: 0.35,
+                    borderWidth: 1.5,
+                    pointRadius: 0,
+                    pointHoverRadius: 4,
+                    pointHoverBackgroundColor: '#30D158',
                     yAxisID: 'y1',
                 }]
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
                 interaction: { mode: 'index', intersect: false },
                 plugins: {
-                    legend: { labels: { color: '#8E8E93', font: { size: 12 } } }
+                    legend: {
+                        labels: {
+                            color: '#8E8E93',
+                            font: { size: 11, family: 'ui-rounded, -apple-system, system-ui' },
+                            boxWidth: 8,
+                            boxHeight: 8,
+                            usePointStyle: true,
+                            pointStyle: 'circle'
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(28, 28, 30, 0.96)',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        borderColor: 'rgba(255,255,255,0.08)',
+                        borderWidth: 1,
+                        padding: 10,
+                        cornerRadius: 10,
+                        displayColors: true,
+                        boxPadding: 4
+                    }
                 },
                 scales: {
                     x: {
-                        ticks: { color: '#8E8E93', font: { size: 10 }, maxRotation: 45 },
-                        grid: { color: 'rgba(255,255,255,0.06)' }
+                        ticks: { color: '#8E8E93', font: { size: 10 }, maxRotation: 0, autoSkipPadding: 20 },
+                        grid: { display: false },
+                        border: { display: false }
                     },
                     y: {
-                        position: 'left',
-                        ticks: { color: '#0A84FF', font: { size: 11 } },
-                        grid: { color: 'rgba(255,255,255,0.06)' },
-                        title: { display: true, text: 'kg', color: '#0A84FF' }
+                        position: 'right',
+                        ticks: { color: '#8E8E93', font: { size: 10 }, padding: 6 },
+                        grid: { color: 'rgba(255,255,255,0.04)' },
+                        border: { display: false }
                     },
                     y1: {
-                        position: 'right',
-                        ticks: { color: '#30D158', font: { size: 11 } },
-                        grid: { drawOnChartArea: false },
-                        title: { display: true, text: 'Volumen', color: '#30D158' }
+                        position: 'left',
+                        display: false
                     }
                 }
             }
@@ -68,11 +103,17 @@
     </script>
     {% endif %}
 
-    <div class="exercise-history-list">
+    <div class="ex-history-list">
         {% for h in history|reverse %}
-        <div class="exercise-row">
-            <span class="exercise-detail">{{ h.date_fmt }}</span>
-            <span class="exercise-detail">{{ h.max_weight }} kg &middot; {{ h.sets }} Sätze &middot; {{ h.total_reps }} Wdh.</span>
+        <div class="ex-set">
+            <span class="ex-set-idx" style="min-width: 0; color: var(--text-2); font-size: 12px; letter-spacing: 0;">{{ h.date_fmt }}</span>
+            <span class="ex-set-val" style="flex:1; text-align: right;">
+                <span>{{ h.max_weight }}</span><span class="unit">kg</span>
+                <span class="times">·</span>
+                <span>{{ h.sets }}</span><span class="unit">Sätze</span>
+                <span class="times">·</span>
+                <span>{{ h.total_reps }}</span><span class="unit">Wdh</span>
+            </span>
         </div>
         {% endfor %}
     </div>

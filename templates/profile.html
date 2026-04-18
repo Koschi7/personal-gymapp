@@ -1,33 +1,24 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="page">
+<div class="page stagger">
+    <div class="page-kicker">Einstellungen</div>
     <h1 class="page-title">Profil</h1>
 
     <div id="profile-form-wrap">
         {% include "partials/profile_form.html" %}
     </div>
 
-    <div class="card" style="margin-top: 24px">
-        <div class="card-label">Daten</div>
-        <div class="form-row form-row-half">
-            <a href="/export/csv" class="btn btn-full" download>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="btn-icon">
-                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
-                    <polyline points="7 10 12 15 17 10"/>
-                    <line x1="12" y1="15" x2="12" y2="3"/>
-                </svg>
-                CSV
-            </a>
-            <a href="/export/json" class="btn btn-full" download>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="btn-icon">
-                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
-                    <polyline points="7 10 12 15 17 10"/>
-                    <line x1="12" y1="15" x2="12" y2="3"/>
-                </svg>
-                JSON
-            </a>
-        </div>
-    </div>
+    <section class="section">
+        <div class="section-head"><h2>Daten</h2></div>
+        <a href="/export/csv" class="export-link" download>
+            <span>Alle Trainingsdaten als CSV</span>
+            <span class="export-ext">.csv</span>
+        </a>
+        <a href="/export/json" class="export-link" download>
+            <span>Alle Trainingsdaten als JSON</span>
+            <span class="export-ext">.json</span>
+        </a>
+    </section>
 </div>
 {% endblock %}

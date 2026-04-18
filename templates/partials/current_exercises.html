@@ -1,30 +1,47 @@
+{% set bp_slugs = {
+    'Brust': 'brust', 'Rücken': 'ruecken', 'Schulter': 'schulter',
+    'Arme': 'arme', 'Nacken': 'nacken', 'Bauch': 'bauch', 'Beine': 'beine'
+} %}
+
 {% if new_pr %}
 <div class="pr-banner">
-    Neuer PR! {{ new_pr.name }} — {{ new_pr.weight }} kg
+    <div class="pr-banner-icon">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4h10v2h2a3 3 0 0 1-3 3 5 5 0 0 1-3.5 3.87V15h3v2H8v-2h3v-2.13A5 5 0 0 1 7.5 9 3 3 0 0 1 4.5 6h2.5zM5.5 6a1.5 1.5 0 0 0 1.5 1.5V6zm13 0h-1.5v1.5A1.5 1.5 0 0 0 18.5 6z"/></svg>
+    </div>
+    <div class="pr-banner-content">
+        <div class="pr-banner-label">NEUER PR</div>
+        <div class="pr-banner-text">{{ new_pr.name }} · <span class="num">{{ new_pr.weight }}</span> kg</div>
+    </div>
 </div>
 {% endif %}
+
 {% if exercise_groups %}
+{% set total_sets = exercise_groups | map(attribute='sets') | map('length') | sum %}
 <div class="card">
-    <div class="card-label">Aktuelle Übungen</div>
+    <div class="card-title">Aktuelle Sätze
+        <span class="card-hint">{{ total_sets }} gesamt</span>
+    </div>
     {% for group in exercise_groups %}
-    <div class="exercise-group">
-        <div class="exercise-group-header">
-            <span class="exercise-name">{{ group.name }}</span>
-            <span class="tag tag-sm">{{ group.body_part }}</span>
+    <div class="ex-group">
+        <div class="ex-group-head">
+            <span class="ex-group-title">{{ group.name }}</span>
+            <span class="bp-chip {{ bp_slugs.get(group.body_part, '') }}">{{ group.body_part }}</span>
         </div>
         {% for ex in group.sets %}
-        <div class="exercise-row exercise-set-row">
-            <div class="exercise-info">
-                <span class="exercise-detail">Satz {{ loop.index }}: {{ ex.weight }} kg x {{ ex.reps }} Wdh.</span>
-            </div>
-            <button class="btn-icon-only"
+        <div class="ex-set">
+            <span class="ex-set-idx">{{ loop.index }}</span>
+            <span class="ex-set-val" style="flex:1">
+                <span>{{ ex.weight }}</span><span class="unit">kg</span>
+                <span class="times">×</span>
+                <span>{{ ex.reps }}</span>
+            </span>
+            <button class="icon-btn danger ex-set-actions"
                     hx-delete="/training/exercise/{{ ex.id }}?workout_id={{ ex.workout_id }}"
                     hx-target="#current-exercises"
                     hx-swap="innerHTML"
                     hx-confirm="Satz löschen?">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="3 6 5 6 21 6"/>
-                    <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
                 </svg>
             </button>
         </div>
