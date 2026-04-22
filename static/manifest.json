@@ -1,10 +1,10 @@
 {
-  "name": "GymApp",
-  "short_name": "GymApp",
+  "name": "MyGymApp",
+  "short_name": "MyGymApp",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#000000",
-  "theme_color": "#000000",
+  "background_color": "#0E0E10",
+  "theme_color": "#0E0E10",
   "icons": [
     {
       "src": "/static/icon-192.png",

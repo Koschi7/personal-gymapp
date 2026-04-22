@@ -12,39 +12,51 @@
 }
 
 :root {
-    /* Neutrals */
-    --bg: #000000;
-    --bg-elev: #0E0E10;
-    --surface: #18181B;
-    --surface-2: #232326;
-    --surface-3: #2C2C30;
+    /* Neutrals — MyGymApp brand */
+    --bg: #0E0E10;
+    --bg-elev: #141418;
+    --surface: #1A1A1F;
+    --surface-2: #232328;
+    --surface-3: #2E2E34;
     --hairline: rgba(255, 255, 255, 0.06);
     --hairline-strong: rgba(255, 255, 255, 0.10);
 
     /* Text */
-    --text: #F5F5F7;
-    --text-2: #A1A1A6;
-    --text-3: #636366;
-    --text-4: #3A3A3C;
+    --text: #FFFFFF;
+    --text-2: #A1A1AA;
+    --text-3: #6B6B72;
+    --text-4: #3A3A3F;
 
-    /* System colors (iOS) */
-    --blue: #0A84FF;
-    --green: #30D158;
-    --orange: #FF9F0A;
-    --red: #FF453A;
-    --pink: #FF375F;
-    --purple: #BF5AF2;
-    --yellow: #FFD60A;
-    --gold: #D4AF37;
+    /* Brand — primary purple + accent lime */
+    --brand: #7C5CFC;
+    --brand-2: #9A7FFD;
+    --brand-deep: #5B3FD9;
+    --brand-tint: rgba(124, 92, 252, 0.12);
+    --accent: #D9FF6A;
+    --accent-2: #E5FF8E;
+    --accent-on: #0E0E10;
+    --accent-tint: rgba(217, 255, 106, 0.14);
 
-    /* Body part palette */
-    --bp-brust:    #FF453A;
-    --bp-ruecken:  #0A84FF;
-    --bp-schulter: #FF9F0A;
-    --bp-arme:     #FFD60A;
-    --bp-nacken:   #FF375F;
-    --bp-bauch:    --purple, #BF5AF2;
-    --bp-beine:    #30D158;
+    /* Semantic — used sparingly */
+    --red: #FF5A6B;
+    --green: #7ED957;
+    --orange: #FFA94D;
+    --yellow: #FFD560;
+
+    /* Body part palette — harmonized with brand */
+    --bp-brust:    #FF5A6B;
+    --bp-ruecken:  #7C5CFC;
+    --bp-schulter: #FFA94D;
+    --bp-arme:     #D9FF6A;
+    --bp-nacken:   #F768A1;
+    --bp-bauch:    #B794F4;
+    --bp-beine:    #7ED957;
+
+    /* Legacy aliases (keep existing refs working) */
+    --blue: var(--brand);
+    --pink: #F768A1;
+    --purple: var(--brand);
+    --gold: var(--accent);
 
     /* Radii */
     --r-xs: 8px;
@@ -61,10 +73,10 @@
     --safe-top: env(safe-area-inset-top, 0px);
     --safe-bottom: env(safe-area-inset-bottom, 0px);
 
-    /* Type */
-    --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
-    --font-text: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
-    --font-rounded: ui-rounded, -apple-system, 'SF Pro Rounded', system-ui, sans-serif;
+    /* Type — Sora (display) + Inter (body) */
+    --font-display: 'Sora', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    --font-text: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    --font-rounded: 'Sora', -apple-system, system-ui, sans-serif;
     --font-mono: ui-monospace, 'SF Mono', Menlo, monospace;
 }
 
@@ -84,7 +96,7 @@ body {
     padding-bottom: calc(84px + var(--safe-bottom));
     overscroll-behavior: none;
     background:
-        radial-gradient(ellipse 80% 40% at 50% 0%, rgba(10, 132, 255, 0.05), transparent 70%),
+        radial-gradient(ellipse 80% 40% at 50% 0%, rgba(124, 92, 252, 0.09), transparent 70%),
         var(--bg);
 }
 
@@ -516,8 +528,8 @@ input[type="date"] {
    ========================================================================== */
 
 .live-banner {
-    background: linear-gradient(135deg, rgba(48, 209, 88, 0.12), rgba(10, 132, 255, 0.08));
-    border: 1px solid rgba(48, 209, 88, 0.28);
+    background: linear-gradient(135deg, rgba(217, 255, 106, 0.14), rgba(124, 92, 252, 0.10));
+    border: 1px solid rgba(217, 255, 106, 0.30);
     border-radius: var(--r);
     padding: 14px 16px;
     display: flex;
@@ -530,7 +542,7 @@ input[type="date"] {
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    background: var(--green);
+    background: var(--accent);
     position: relative;
     flex-shrink: 0;
 }
@@ -540,7 +552,7 @@ input[type="date"] {
     position: absolute;
     inset: -4px;
     border-radius: 50%;
-    border: 2px solid var(--green);
+    border: 2px solid var(--accent);
     opacity: 0.5;
     animation: live-pulse 1.6s infinite;
 }
@@ -558,9 +570,10 @@ input[type="date"] {
 
 .live-label {
     font-size: 11px;
-    font-weight: 600;
-    color: var(--green);
-    letter-spacing: 0.2px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
     margin-bottom: 2px;
 }
 
@@ -855,29 +868,30 @@ input[type="date"] {
     align-items: center;
     justify-content: center;
     gap: 6px;
-    background: var(--blue);
-    color: white;
+    background: var(--accent);
+    color: var(--accent-on);
     border: none;
     border-radius: var(--r-sm);
     padding: 13px 20px;
     font-family: var(--font-text);
-    font-size: 16px;
-    font-weight: 600;
+    font-size: 15px;
+    font-weight: 700;
     letter-spacing: -0.1px;
     cursor: pointer;
     transition: transform 0.1s, opacity 0.15s, background 0.15s;
     -webkit-appearance: none;
-    min-height: 48px;
+    min-height: 50px;
     text-decoration: none;
 }
 
-.btn:active { opacity: 0.8; transform: scale(0.98); }
+.btn:active { opacity: 0.85; transform: scale(0.98); }
 
 .btn-full { width: 100%; }
 
 .btn-sm {
     padding: 8px 14px;
-    font-size: 14px;
+    font-size: 13px;
+    font-weight: 700;
     min-height: 36px;
     border-radius: var(--r-xs);
 }
@@ -885,16 +899,23 @@ input[type="date"] {
 .btn-ghost {
     background: var(--surface-2);
     color: var(--text);
+    font-weight: 600;
+}
+
+.btn-brand {
+    background: var(--brand);
+    color: #fff;
 }
 
 .btn-outline {
     background: transparent;
-    color: var(--blue);
-    border: 1.5px solid var(--blue);
+    color: var(--brand);
+    border: 1.5px solid var(--brand);
 }
 
 .btn-danger {
     background: var(--red);
+    color: #fff;
 }
 
 .btn-danger-ghost {
@@ -1023,7 +1044,7 @@ select.input option {
     transition: background 0.1s;
 }
 
-.stepper-btn:active { background: rgba(10, 132, 255, 0.12); }
+.stepper-btn:active { background: rgba(124, 92, 252, 0.14); }
 
 .stepper-input {
     width: 100%;
@@ -1109,7 +1130,7 @@ select.input option {
    ========================================================================== */
 
 .last-perf {
-    background: rgba(10, 132, 255, 0.08);
+    background: var(--brand-tint);
     border-radius: var(--r-sm);
     padding: 10px 14px;
     margin-bottom: 14px;
@@ -1154,8 +1175,8 @@ select.input option {
     display: flex;
     align-items: center;
     gap: 10px;
-    background: linear-gradient(135deg, rgba(212, 175, 55, 0.18), rgba(212, 175, 55, 0.06));
-    border: 1px solid rgba(212, 175, 55, 0.4);
+    background: linear-gradient(135deg, rgba(217, 255, 106, 0.14), rgba(124, 92, 252, 0.08));
+    border: 1px solid rgba(217, 255, 106, 0.35);
     border-radius: var(--r);
     padding: 14px 16px;
     margin-bottom: 14px;
@@ -1165,8 +1186,8 @@ select.input option {
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    background: rgba(212, 175, 55, 0.2);
-    color: var(--gold);
+    background: var(--accent);
+    color: var(--accent-on);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1179,9 +1200,10 @@ select.input option {
 
 .pr-banner-label {
     font-size: 11px;
-    font-weight: 600;
-    color: var(--gold);
-    letter-spacing: 0.3px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
     margin-bottom: 2px;
 }
 
@@ -1490,7 +1512,7 @@ select.input option {
 
 .cal-day-trained {
     color: var(--text);
-    background: rgba(10, 132, 255, 0.16);
+    background: var(--brand-tint);
     font-weight: 600;
 }
 
@@ -1695,7 +1717,7 @@ select.input option {
     height: 26px;
 }
 
-.tab.active { color: var(--blue); }
+.tab.active { color: var(--accent); }
 
 /* ==========================================================================
    Empty states
