@@ -51,6 +51,9 @@ async def dashboard(request: Request):
         active_exercises = await db.get_workout_exercises(active_workout["id"])
         active_workout["started_fmt"] = db.format_datetime(active_workout["started_at"])
     personal_records = await db.get_personal_records()
+    streak = await db.get_current_streak()
+    weekly_volume = await db.get_weekly_volume()
+    monthly_prs = await db.get_monthly_prs()
     today = date.today()
     cal = await db.get_calendar_data(today.year, today.month)
     return templates.TemplateResponse("dashboard.html", {
@@ -64,6 +67,9 @@ async def dashboard(request: Request):
         "active_workout": active_workout,
         "active_exercises": active_exercises,
         "personal_records": personal_records,
+        "streak": streak,
+        "weekly_volume": weekly_volume,
+        "monthly_prs": monthly_prs,
         "cal": cal,
         "active_period": "all",
         "active": "dashboard",
