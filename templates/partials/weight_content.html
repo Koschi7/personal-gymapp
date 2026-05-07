@@ -80,8 +80,8 @@ function initWeightChart() {
 
     const ctx = canvas.getContext('2d');
     const gradient = ctx.createLinearGradient(0, 0, 0, 220);
-    gradient.addColorStop(0, 'rgba(10, 132, 255, 0.25)');
-    gradient.addColorStop(1, 'rgba(10, 132, 255, 0)');
+    gradient.addColorStop(0, 'rgba(124, 92, 252, 0.28)');
+    gradient.addColorStop(1, 'rgba(124, 92, 252, 0)');
 
     canvas._chart = new Chart(canvas, {
         type: 'line',
@@ -89,15 +89,15 @@ function initWeightChart() {
             labels: labels,
             datasets: [{
                 data: values,
-                borderColor: '#0A84FF',
+                borderColor: '#7C5CFC',
                 borderWidth: 2,
                 backgroundColor: gradient,
                 fill: true,
                 tension: 0.35,
                 pointRadius: ctx => ctx.dataIndex === values.length - 1 ? 5 : 0,
                 pointHoverRadius: 6,
-                pointBackgroundColor: '#0A84FF',
-                pointBorderColor: '#000',
+                pointBackgroundColor: '#D9FF6A',
+                pointBorderColor: '#0E0E10',
                 pointBorderWidth: 2,
             }]
         },

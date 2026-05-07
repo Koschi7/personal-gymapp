@@ -18,8 +18,8 @@
         const ctx = canvas.getContext('2d');
         const h = canvas.parentElement.clientHeight || 200;
         const grad = ctx.createLinearGradient(0, 0, 0, h);
-        grad.addColorStop(0, 'rgba(10, 132, 255, 0.22)');
-        grad.addColorStop(1, 'rgba(10, 132, 255, 0)');
+        grad.addColorStop(0, 'rgba(124, 92, 252, 0.24)');
+        grad.addColorStop(1, 'rgba(124, 92, 252, 0)');
 
         new Chart(ctx, {
             type: 'line',
@@ -28,20 +28,20 @@
                 datasets: [{
                     label: 'Max kg',
                     data: [{% for h in history %}{{ h.max_weight }}{% if not loop.last %},{% endif %}{% endfor %}],
-                    borderColor: '#0A84FF',
+                    borderColor: '#7C5CFC',
                     backgroundColor: grad,
                     fill: true,
                     tension: 0.35,
                     borderWidth: 2,
                     pointRadius: 0,
                     pointHoverRadius: 5,
-                    pointHoverBackgroundColor: '#0A84FF',
-                    pointHoverBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#D9FF6A',
+                    pointHoverBorderColor: '#0E0E10',
                     pointHoverBorderWidth: 2,
                 }, {
                     label: 'Volumen',
                     data: [{% for h in history %}{{ h.volume }}{% if not loop.last %},{% endif %}{% endfor %}],
-                    borderColor: '#30D158',
+                    borderColor: '#D9FF6A',
                     borderDash: [3, 4],
                     backgroundColor: 'transparent',
                     fill: false,
@@ -49,7 +49,7 @@
                     borderWidth: 1.5,
                     pointRadius: 0,
                     pointHoverRadius: 4,
-                    pointHoverBackgroundColor: '#30D158',
+                    pointHoverBackgroundColor: '#D9FF6A',
                     yAxisID: 'y1',
                 }]
             },

@@ -12,76 +12,140 @@
 
 {% block content %}
 <div class="page stagger">
-    <!-- Greeting -->
-    <header class="greeting">
-        {% if profile.picture %}
-        <img src="/uploads/{{ profile.picture }}" alt="" class="greeting-avatar">
-        {% else %}
-        <div class="greeting-avatar placeholder">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="8" r="4"/><path d="M4 21v-1c0-3.3 3.6-6 8-6s8 2.7 8 6v1"/>
-            </svg>
+    <!-- Hero: motivational greeting + primary CTA -->
+    <section class="hero">
+        <div class="hero-grain" aria-hidden="true"></div>
+        <div class="hero-top">
+            <div class="hero-brand">
+                <svg class="hero-logo" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+                    <rect x="1" y="12" width="3" height="8" rx="1.2" fill="#D9FF6A"/>
+                    <rect x="4" y="9" width="3" height="14" rx="1.2" fill="#D9FF6A"/>
+                    <rect x="25" y="9" width="3" height="14" rx="1.2" fill="#D9FF6A"/>
+                    <rect x="28" y="12" width="3" height="8" rx="1.2" fill="#D9FF6A"/>
+                    <rect x="7" y="14.5" width="18" height="3" rx="1" fill="#fff"/>
+                </svg>
+                <span class="hero-brand-name">MyGymApp</span>
+            </div>
+            {% if profile.picture %}
+            <img src="/uploads/{{ profile.picture }}?v={{ profile.picture_v }}" alt="" class="hero-avatar">
+            {% else %}
+            <div class="hero-avatar placeholder">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="8" r="4"/><path d="M4 21v-1c0-3.3 3.6-6 8-6s8 2.7 8 6v1"/>
+                </svg>
+            </div>
+            {% endif %}
         </div>
-        {% endif %}
-        <div class="greeting-text">
-            <span class="greeting-date" id="greeting-date"></span>
-            <span class="greeting-name">Hallo{% if profile.name %}, {{ profile.name.split(' ')[0] }}{% endif %}</span>
+        <div class="hero-body">
+            <span class="hero-kicker" id="hero-date"></span>
+            <h1 class="hero-title" id="hero-title">Zeit zu trainieren</h1>
+            <p class="hero-sub" id="hero-sub">Jeder Satz bringt dich näher an dein Ziel.</p>
         </div>
-    </header>
+        <div class="hero-cta">
+            {% if active_workout %}
+            <a href="/training" class="btn btn-hero btn-pulse">
+                <span class="btn-hero-dot"></span>
+                Training fortsetzen
+                <svg class="btn-hero-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg>
+            </a>
+            {% set active_ex_count = active_exercises | map(attribute='name') | unique | list | length %}
+            {% set active_set_count = active_exercises | length %}
+            <span class="hero-cta-meta">seit {{ active_workout.started_fmt }}{% if active_set_count %} · {{ active_ex_count }} {% if active_ex_count == 1 %}Übung{% else %}Übungen{% endif %} · {{ active_set_count }} Sätze{% endif %}</span>
+            {% else %}
+            <a href="/training" class="btn btn-hero">
+                <svg viewBox="0 0 24 24" fill="currentColor" class="btn-icon"><polygon points="6 3 20 12 6 21"/></svg>
+                Training starten
+                <svg class="btn-hero-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg>
+            </a>
+            {% if last_workout %}
+            <span class="hero-cta-meta">Letztes Training {{ last_workout.date_fmt }}</span>
+            {% endif %}
+            {% endif %}
+        </div>
+    </section>
 
-    <!-- Active workout — highest priority when active -->
-    {% if active_workout %}
-    <div class="live-banner">
-        <span class="live-pulse"></span>
-        <div class="live-content">
-            <div class="live-label">Aktives Training</div>
-            <div class="live-meta">
-                {{ active_workout.started_fmt }}{% if active_exercises %} · <span class="num">{{ active_exercises | length }}</span> Übungen{% endif %}
+    <!-- Bento stat tiles -->
+    <section class="bento">
+        <!-- Streak tile — tall -->
+        <div class="tile tile-streak {% if streak > 0 %}is-live{% endif %}">
+            <div class="tile-head">
+                <span class="tile-label">Streak</span>
+                <svg class="tile-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 3c.5 3 2.5 4 3.5 6 1.4 2.6.5 5.4-1 7-1.4 1.6-4.1 2.1-6.2 1-2.5-1.3-3.4-4.2-2.3-6.8.8-1.8 2.4-2.6 2-5 1.4.4 3 1 4 2z"/>
+                </svg>
             </div>
+            <div class="tile-value">
+                <span class="tile-num">{{ streak }}</span>
+                <span class="tile-suffix">{% if streak == 1 %}Tag{% else %}Tage{% endif %}</span>
+            </div>
+            <span class="tile-hint">
+                {% if streak == 0 %}Leg heute los{% elif streak < 3 %}Gut angefangen{% elif streak < 7 %}Starke Woche{% else %}Auf Feuer{% endif %}
+            </span>
         </div>
-        <a href="/training" class="btn btn-sm">Weiter</a>
-    </div>
-    {% endif %}
 
-    <!-- Activity ring: week/month progress at a glance -->
-    <section class="ring-card">
-        <div class="ring-wrap">
-            <svg viewBox="0 0 120 120">
-                <circle class="ring-track" cx="60" cy="60" r="52" stroke-width="9"/>
-                <circle class="ring-fill" cx="60" cy="60" r="52" stroke-width="9"
-                        stroke="url(#gMonth)"
-                        stroke-dasharray="326.7"
-                        stroke-dashoffset="{{ 326.7 * (1 - month_pct_clamped / 100) }}"/>
-                <circle class="ring-track" cx="60" cy="60" r="38" stroke-width="9"/>
-                <circle class="ring-fill" cx="60" cy="60" r="38" stroke-width="9"
-                        stroke="url(#gWeek)"
-                        stroke-dasharray="238.8"
-                        stroke-dashoffset="{{ 238.8 * (1 - week_pct_clamped / 100) }}"/>
-                <defs>
-                    <linearGradient id="gWeek" x1="0" y1="0" x2="1" y2="1">
-                        <stop offset="0%" stop-color="#FF9F0A"/>
-                        <stop offset="100%" stop-color="#FFD60A"/>
-                    </linearGradient>
-                    <linearGradient id="gMonth" x1="0" y1="0" x2="1" y2="1">
-                        <stop offset="0%" stop-color="#0A84FF"/>
-                        <stop offset="100%" stop-color="#5E5CE6"/>
-                    </linearGradient>
-                </defs>
-            </svg>
-            <div class="ring-center">
-                <span class="ring-num">{{ week_pct }}<span class="pct">%</span></span>
-                <span class="ring-label">Ziel Woche</span>
+        <!-- Week tile -->
+        <div class="tile tile-week">
+            <div class="tile-head">
+                <span class="tile-label">Diese Woche</span>
+                <svg class="tile-mini-ring" viewBox="0 0 32 32" aria-hidden="true">
+                    <circle cx="16" cy="16" r="13" stroke="rgba(255,255,255,0.08)" stroke-width="3" fill="none"/>
+                    <circle cx="16" cy="16" r="13" stroke="#D9FF6A" stroke-width="3" fill="none"
+                            stroke-linecap="round"
+                            stroke-dasharray="81.68"
+                            stroke-dashoffset="{{ 81.68 * (1 - week_pct_clamped / 100) }}"
+                            transform="rotate(-90 16 16)"/>
+                </svg>
             </div>
+            <div class="tile-value">
+                <span class="tile-num">{{ days_week }}</span>
+                <span class="tile-suffix">/ {{ profile.goal_days_week }}</span>
+            </div>
+            <span class="tile-hint">
+                {% if week_pct >= 100 %}Ziel erreicht{% else %}{{ week_pct }}% des Wochenziels{% endif %}
+            </span>
         </div>
-        <div class="ring-legend">
-            <div class="ring-item">
-                <span class="ring-item-label"><span class="ring-dot" style="background:#FFB00A"></span>Woche</span>
-                <span class="ring-item-value">{{ days_week }}<span class="num-of">/{{ profile.goal_days_week }}</span></span>
+
+        <!-- Volume tile -->
+        <div class="tile tile-volume">
+            <div class="tile-head">
+                <span class="tile-label">Volumen · 7 Tage</span>
+                {% if weekly_volume.delta_pct > 0 %}
+                <span class="tile-delta up">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+                    {{ weekly_volume.delta_pct }}%
+                </span>
+                {% elif weekly_volume.delta_pct < 0 %}
+                <span class="tile-delta down">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                    {{ weekly_volume.delta_pct }}%
+                </span>
+                {% endif %}
             </div>
-            <div class="ring-item">
-                <span class="ring-item-label"><span class="ring-dot" style="background:#0A84FF"></span>Monat</span>
-                <span class="ring-item-value">{{ days_month }}<span class="num-of">/{{ profile.goal_days_month }}</span></span>
+            <div class="tile-value">
+                <span class="tile-num">{{ "{:,}".format(weekly_volume.this_week).replace(",", ".") }}</span>
+                <span class="tile-suffix">kg</span>
             </div>
+            <span class="tile-hint">
+                {% if weekly_volume.last_week > 0 %}vs. {{ "{:,}".format(weekly_volume.last_week).replace(",", ".") }} kg Vorwoche
+                {% elif weekly_volume.this_week > 0 %}Erste Woche — push it{% else %}Noch kein Volumen{% endif %}
+            </span>
+        </div>
+
+        <!-- PRs tile -->
+        <div class="tile tile-pr {% if monthly_prs > 0 %}is-glow{% endif %}">
+            <div class="tile-head">
+                <span class="tile-label">Rekorde · Monat</span>
+                <svg class="tile-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M8 21h8"/><path d="M12 17v4"/><path d="M17 4h3v3a4 4 0 0 1-4 4"/><path d="M7 4H4v3a4 4 0 0 0 4 4"/><path d="M17 4H7v5a5 5 0 0 0 10 0z"/>
+                </svg>
+            </div>
+            <div class="tile-value">
+                <span class="tile-num">{{ monthly_prs }}</span>
+                <span class="tile-suffix">neu</span>
+            </div>
+            <span class="tile-hint">
+                {% if monthly_prs == 0 %}Brich deinen nächsten Rekord{% elif monthly_prs == 1 %}Ein neuer Bestwert{% else %}Du hebst stärker als je{% endif %}
+            </span>
         </div>
     </section>
 
@@ -190,10 +254,53 @@
 <script>
 (function() {
     const weekdays = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
-    const months = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+    const months = ['Jan','Feb','März','Apr','Mai','Juni','Juli','Aug','Sep','Okt','Nov','Dez'];
     const d = new Date();
-    const el = document.getElementById('greeting-date');
-    if (el) el.textContent = `${weekdays[d.getDay()]}, ${d.getDate()}. ${months[d.getMonth()]}`;
+    const h = d.getHours();
+    const firstName = {{ (profile.name.split(' ')[0] if profile.name else '') | tojson }};
+    const streak = {{ streak }};
+    const hasActive = {{ 'true' if active_workout else 'false' }};
+
+    // Date kicker
+    const dateEl = document.getElementById('hero-date');
+    if (dateEl) dateEl.textContent = `${weekdays[d.getDay()]}, ${d.getDate()}. ${months[d.getMonth()]}`;
+
+    // Title — time-of-day greeting
+    let greeting;
+    if (h < 5) greeting = 'Nachtschicht';
+    else if (h < 11) greeting = 'Guten Morgen';
+    else if (h < 14) greeting = 'Mittagszeit';
+    else if (h < 18) greeting = 'Guten Tag';
+    else if (h < 22) greeting = 'Guten Abend';
+    else greeting = 'Späte Session';
+    const titleEl = document.getElementById('hero-title');
+    if (titleEl) {
+        titleEl.textContent = firstName ? `${greeting}, ${firstName}` : greeting;
+    }
+
+    // Subtitle — motivation based on state
+    const subEl = document.getElementById('hero-sub');
+    if (subEl) {
+        let sub;
+        if (hasActive) {
+            sub = 'Dein Training läuft. Bleib dran.';
+        } else if (streak >= 7) {
+            sub = `${streak} Tage in Folge — unaufhaltbar.`;
+        } else if (streak >= 3) {
+            sub = `${streak} Tage Streak. Nicht abreißen lassen.`;
+        } else if (streak === 0) {
+            const lines = [
+                'Jeder Satz bringt dich näher an dein Ziel.',
+                'Heute ist ein guter Tag zum Anfangen.',
+                'Der schwerste Satz ist der erste.',
+                'Stronger every day.',
+            ];
+            sub = lines[d.getDate() % lines.length];
+        } else {
+            sub = 'Mach dort weiter, wo du aufgehört hast.';
+        }
+        subEl.textContent = sub;
+    }
 })();
 </script>
 {% endblock %}

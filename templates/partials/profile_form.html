@@ -6,7 +6,7 @@
     <form hx-post="/profile" hx-target="#profile-form-wrap" hx-swap="innerHTML" hx-encoding="multipart/form-data">
         <div class="profile-avatar-wrap">
             {% if profile.picture %}
-            <img src="/uploads/{{ profile.picture }}" alt="" class="avatar avatar-xl" id="avatar-preview">
+            <img src="/uploads/{{ profile.picture }}?v={{ profile.picture_v }}" alt="" class="avatar avatar-xl" id="avatar-preview">
             {% else %}
             <div class="avatar avatar-xl avatar-placeholder" id="avatar-preview">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">

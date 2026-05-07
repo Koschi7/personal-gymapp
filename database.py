@@ -104,6 +104,11 @@ async def get_profile() -> dict:
         row = await cursor.fetchone()
         p = dict(row) if row else {"id": 1, "name": "", "picture": None, "goal_days_week": 4}
         p["goal_days_month"] = p["goal_days_week"] * 4
+        p["picture_v"] = ""
+        if p.get("picture"):
+            pic_path = Path(__file__).parent / "data" / "uploads" / p["picture"]
+            if pic_path.exists():
+                p["picture_v"] = str(int(pic_path.stat().st_mtime))
         return p
     finally:
         await db.close()
@@ -316,7 +321,7 @@ async def get_exercise_stats_filtered(period: str = "all") -> list[dict]:
     db = await get_db()
     try:
         cursor = await db.execute(f"""
-            SELECT e.name, e.body_part, COUNT(*) as count,
+            SELECT e.name, e.body_part, COUNT(DISTINCT e.workout_id) as count,
                    SUM(e.weight * e.reps) as volume
             FROM exercises e
             JOIN workouts w ON e.workout_id = w.id
@@ -455,6 +460,98 @@ async def get_training_days_month() -> int:
         await db.close()
 
 
+async def get_current_streak() -> int:
+    """Consecutive days (ending today or yesterday) with at least one finished workout."""
+    db = await get_db()
+    try:
+        cursor = await db.execute("""
+            SELECT DISTINCT date(started_at) as d
+            FROM workouts
+            WHERE ended_at IS NOT NULL
+            ORDER BY d DESC
+        """)
+        rows = [r["d"] for r in await cursor.fetchall()]
+        if not rows:
+            return 0
+        today = date.today()
+        most_recent = date.fromisoformat(rows[0])
+        # Streak is only "live" if user trained today or yesterday
+        if (today - most_recent).days > 1:
+            return 0
+        streak = 1
+        prev = most_recent
+        for d_str in rows[1:]:
+            d = date.fromisoformat(d_str)
+            if (prev - d).days == 1:
+                streak += 1
+                prev = d
+            else:
+                break
+        return streak
+    finally:
+        await db.close()
+
+
+async def get_weekly_volume() -> dict:
+    """Total kg·reps volume for the current ISO week, plus delta vs previous week."""
+    db = await get_db()
+    try:
+        cursor = await db.execute("""
+            SELECT
+                COALESCE(SUM(CASE
+                    WHEN date(w.started_at) >= date('now', 'localtime', 'weekday 1', '-7 days')
+                    THEN e.weight * e.reps ELSE 0 END), 0) as this_week,
+                COALESCE(SUM(CASE
+                    WHEN date(w.started_at) >= date('now', 'localtime', 'weekday 1', '-14 days')
+                     AND date(w.started_at) <  date('now', 'localtime', 'weekday 1', '-7 days')
+                    THEN e.weight * e.reps ELSE 0 END), 0) as last_week
+            FROM exercises e
+            JOIN workouts w ON e.workout_id = w.id
+            WHERE w.ended_at IS NOT NULL
+        """)
+        row = await cursor.fetchone()
+        this_w = int(row["this_week"] or 0)
+        last_w = int(row["last_week"] or 0)
+        delta_pct = 0
+        if last_w > 0:
+            delta_pct = round((this_w - last_w) / last_w * 100)
+        return {"this_week": this_w, "last_week": last_w, "delta_pct": delta_pct}
+    finally:
+        await db.close()
+
+
+async def get_monthly_prs() -> int:
+    """Count of exercises whose this-month max beat their previous all-time max."""
+    db = await get_db()
+    try:
+        cursor = await db.execute("""
+            WITH this_month AS (
+                SELECT e.name, MAX(e.weight) as m
+                FROM exercises e
+                JOIN workouts w ON e.workout_id = w.id
+                WHERE w.ended_at IS NOT NULL
+                  AND strftime('%Y-%m', w.started_at) = strftime('%Y-%m', 'now', 'localtime')
+                GROUP BY e.name
+            ),
+            before_month AS (
+                SELECT e.name, MAX(e.weight) as m
+                FROM exercises e
+                JOIN workouts w ON e.workout_id = w.id
+                WHERE w.ended_at IS NOT NULL
+                  AND strftime('%Y-%m', w.started_at) < strftime('%Y-%m', 'now', 'localtime')
+                GROUP BY e.name
+            )
+            SELECT COUNT(*) as cnt
+            FROM this_month t
+            LEFT JOIN before_month b ON b.name = t.name
+            WHERE b.m IS NULL OR t.m > b.m
+        """)
+        row = await cursor.fetchone()
+        return int(row["cnt"] or 0) if row else 0
+    finally:
+        await db.close()
+
+
 async def get_body_part_stats_filtered(period: str = "all") -> list[dict]:
     """Get body part stats with percentages for a given time period.
 
@@ -473,7 +570,7 @@ async def get_body_part_stats_filtered(period: str = "all") -> list[dict]:
     db = await get_db()
     try:
         cursor = await db.execute(f"""
-            SELECT e.body_part, COUNT(*) as count
+            SELECT e.body_part, COUNT(DISTINCT e.workout_id || '|' || e.name) as count
             FROM exercises e
             JOIN workouts w ON e.workout_id = w.id
             WHERE w.ended_at IS NOT NULL {date_filter}
